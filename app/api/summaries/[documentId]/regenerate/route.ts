@@ -61,8 +61,16 @@ export async function POST(
       );
     }
 
-    // Start regeneration process
-    const result = await regenerateSummaries(documentId);
+    // Parse request body for user preferences
+    const body = await request.json().catch(() => ({}));
+    const options = {
+      focusChapters: body.focusChapters || [],
+      focusTopics: body.focusTopics || [],
+      customInstructions: body.customInstructions || ""
+    };
+
+    // Start regeneration process with user preferences
+    const result = await regenerateSummaries(documentId, options);
 
     return NextResponse.json(result);
   } catch (error) {

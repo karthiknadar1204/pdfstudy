@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { FileText, RefreshCw } from "lucide-react";
+import { RegenerationModal } from "@/components/RegenerationModal";
 
 export default function DocumentSummary() {
   const params = useParams();
@@ -20,6 +21,7 @@ export default function DocumentSummary() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSummaryLoading, setIsSummaryLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isRegenerationModalOpen, setIsRegenerationModalOpen] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
   const router = useRouter();
@@ -53,15 +55,20 @@ export default function DocumentSummary() {
     }
   }, [documentId, toast, user]);
 
-  const regenerateSummary = async () => {
+  const handleRegenerationSubmit = async (options: {
+    focusChapters: string[];
+    focusTopics: string[];
+    customInstructions: string;
+  }) => {
     try {
+      setIsRegenerationModalOpen(false);
       setIsSummaryLoading(true);
       toast({
         title: "Processing",
-        description: "Regenerating summaries. This may take a minute...",
+        description: "Regenerating summaries with your preferences. This may take a minute...",
       });
       
-      const response = await axios.post(`/api/summaries/${documentId}/regenerate`);
+      const response = await axios.post(`/api/summaries/${documentId}/regenerate`, options);
       
       if (response.data.success) {
         toast({
@@ -83,6 +90,10 @@ export default function DocumentSummary() {
       });
       setIsSummaryLoading(false);
     }
+  };
+
+  const regenerateSummary = () => {
+    setIsRegenerationModalOpen(true);
   };
 
   if (isLoading) {
@@ -224,6 +235,13 @@ export default function DocumentSummary() {
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
+      
+      {/* Regeneration Modal */}
+      <RegenerationModal
+        isOpen={isRegenerationModalOpen}
+        onClose={() => setIsRegenerationModalOpen(false)}
+        onSubmit={handleRegenerationSubmit}
+      />
     </div>
   );
 } 
