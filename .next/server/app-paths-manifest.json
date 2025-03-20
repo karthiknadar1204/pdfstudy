@@ -1,0 +1,7 @@
+{
+  "/api/documents/[documentId]/route": "app/api/documents/[documentId]/route.js",
+  "/api/documents/route": "app/api/documents/route.js",
+  "/api/chat/[documentId]/route": "app/api/chat/[documentId]/route.js",
+  "/chat-with-pdf/page": "app/chat-with-pdf/page.js",
+  "/chat-with-pdf/[documentId]/page": "app/chat-with-pdf/[documentId]/page.js"
+}

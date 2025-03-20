@@ -1,0 +1,141 @@
+{
+  "node": {
+    "7f3ad90988b659904cee0389ae4316eb4cd78c4bbe": {
+      "workers": {
+        "app/chat-with-pdf/[documentId]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%5B%227f3ad90988b659904cee0389ae4316eb4cd78c4bbe%22%2C%22createOrReadKeylessAction%22%5D%2C%5B%227f8d8978dabddc895c99c8f8d2fc2112b9870a4134%22%2C%22syncKeylessConfigAction%22%5D%2C%5B%227fc9715ce8140fa4cb9f428d22b6a670a984448e84%22%2C%22deleteKeylessAction%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/chat-with-pdf/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%5B%227f3ad90988b659904cee0389ae4316eb4cd78c4bbe%22%2C%22createOrReadKeylessAction%22%5D%2C%5B%227f8d8978dabddc895c99c8f8d2fc2112b9870a4134%22%2C%22syncKeylessConfigAction%22%5D%2C%5B%227fc9715ce8140fa4cb9f428d22b6a670a984448e84%22%2C%22deleteKeylessAction%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/chat-with-pdf/[documentId]/page": "rsc",
+        "app/chat-with-pdf/page": "rsc"
+      }
+    },
+    "7f8d8978dabddc895c99c8f8d2fc2112b9870a4134": {
+      "workers": {
+        "app/chat-with-pdf/[documentId]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%5B%227f3ad90988b659904cee0389ae4316eb4cd78c4bbe%22%2C%22createOrReadKeylessAction%22%5D%2C%5B%227f8d8978dabddc895c99c8f8d2fc2112b9870a4134%22%2C%22syncKeylessConfigAction%22%5D%2C%5B%227fc9715ce8140fa4cb9f428d22b6a670a984448e84%22%2C%22deleteKeylessAction%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/chat-with-pdf/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%5B%227f3ad90988b659904cee0389ae4316eb4cd78c4bbe%22%2C%22createOrReadKeylessAction%22%5D%2C%5B%227f8d8978dabddc895c99c8f8d2fc2112b9870a4134%22%2C%22syncKeylessConfigAction%22%5D%2C%5B%227fc9715ce8140fa4cb9f428d22b6a670a984448e84%22%2C%22deleteKeylessAction%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/chat-with-pdf/[documentId]/page": "rsc",
+        "app/chat-with-pdf/page": "rsc"
+      }
+    },
+    "7fc9715ce8140fa4cb9f428d22b6a670a984448e84": {
+      "workers": {
+        "app/chat-with-pdf/[documentId]/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%5B%227f3ad90988b659904cee0389ae4316eb4cd78c4bbe%22%2C%22createOrReadKeylessAction%22%5D%2C%5B%227f8d8978dabddc895c99c8f8d2fc2112b9870a4134%22%2C%22syncKeylessConfigAction%22%5D%2C%5B%227fc9715ce8140fa4cb9f428d22b6a670a984448e84%22%2C%22deleteKeylessAction%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        },
+        "app/chat-with-pdf/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%5B%227f3ad90988b659904cee0389ae4316eb4cd78c4bbe%22%2C%22createOrReadKeylessAction%22%5D%2C%5B%227f8d8978dabddc895c99c8f8d2fc2112b9870a4134%22%2C%22syncKeylessConfigAction%22%5D%2C%5B%227fc9715ce8140fa4cb9f428d22b6a670a984448e84%22%2C%22deleteKeylessAction%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/chat-with-pdf/[documentId]/page": "rsc",
+        "app/chat-with-pdf/page": "rsc"
+      }
+    },
+    "7f5f9ac01c076e1942d61434778de0da739df391c4": {
+      "workers": {
+        "app/chat-with-pdf/[documentId]/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%5B%227f5f9ac01c076e1942d61434778de0da739df391c4%22%2C%22invalidateCacheAction%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fuser.ts%22%2C%5B%5B%2240cec24a01091c959e712394aa675fa501c7b0eb18%22%2C%22createOrUpdateUser%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/chat-with-pdf/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%5B%227f5f9ac01c076e1942d61434778de0da739df391c4%22%2C%22invalidateCacheAction%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fuser.ts%22%2C%5B%5B%2240cec24a01091c959e712394aa675fa501c7b0eb18%22%2C%22createOrUpdateUser%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fdocument.ts%22%2C%5B%5B%224097591a5def17dbcb1e0cd8deebfb556b28c6c689%22%2C%22saveDocument%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/chat-with-pdf/[documentId]/page": "action-browser",
+        "app/chat-with-pdf/page": "action-browser"
+      }
+    },
+    "40cec24a01091c959e712394aa675fa501c7b0eb18": {
+      "workers": {
+        "app/chat-with-pdf/[documentId]/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%5B%227f5f9ac01c076e1942d61434778de0da739df391c4%22%2C%22invalidateCacheAction%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fuser.ts%22%2C%5B%5B%2240cec24a01091c959e712394aa675fa501c7b0eb18%22%2C%22createOrUpdateUser%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/chat-with-pdf/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%5B%227f5f9ac01c076e1942d61434778de0da739df391c4%22%2C%22invalidateCacheAction%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fuser.ts%22%2C%5B%5B%2240cec24a01091c959e712394aa675fa501c7b0eb18%22%2C%22createOrUpdateUser%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fdocument.ts%22%2C%5B%5B%224097591a5def17dbcb1e0cd8deebfb556b28c6c689%22%2C%22saveDocument%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/chat-with-pdf/[documentId]/page": "action-browser",
+        "app/chat-with-pdf/page": "action-browser"
+      }
+    },
+    "4097591a5def17dbcb1e0cd8deebfb556b28c6c689": {
+      "workers": {
+        "app/chat-with-pdf/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%5B%227f5f9ac01c076e1942d61434778de0da739df391c4%22%2C%22invalidateCacheAction%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fuser.ts%22%2C%5B%5B%2240cec24a01091c959e712394aa675fa501c7b0eb18%22%2C%22createOrUpdateUser%22%5D%5D%5D%2C%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Factions%2Fdocument.ts%22%2C%5B%5B%224097591a5def17dbcb1e0cd8deebfb556b28c6c689%22%2C%22saveDocument%22%5D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/chat-with-pdf/page": "action-browser"
+      }
+    },
+    "40b75191ffba29d42d184cac594b69c72f5a8a4ea2": {
+      "workers": {
+        "app/api/chat/[documentId]/route": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Flib%2Fembeddings.ts%22%2C%5B%5B%2240b75191ffba29d42d184cac594b69c72f5a8a4ea2%22%2C%22generateQueryEmbedding%22%5D%2C%5B%226061b4b0266a63367f433d524be9bfb865eae01d6f%22%2C%22generateResponseFromDocument%22%5D%2C%5B%2260c9619da0251a313b176f12525a9cd810ddbd9043%22%2C%22processDocumentQuery%22%5D%2C%5B%22704661934ea74220b9ef7352535d100b8558a4f708%22%2C%22searchVectorDatabase%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/api/chat/[documentId]/route": "rsc"
+      }
+    },
+    "6061b4b0266a63367f433d524be9bfb865eae01d6f": {
+      "workers": {
+        "app/api/chat/[documentId]/route": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Flib%2Fembeddings.ts%22%2C%5B%5B%2240b75191ffba29d42d184cac594b69c72f5a8a4ea2%22%2C%22generateQueryEmbedding%22%5D%2C%5B%226061b4b0266a63367f433d524be9bfb865eae01d6f%22%2C%22generateResponseFromDocument%22%5D%2C%5B%2260c9619da0251a313b176f12525a9cd810ddbd9043%22%2C%22processDocumentQuery%22%5D%2C%5B%22704661934ea74220b9ef7352535d100b8558a4f708%22%2C%22searchVectorDatabase%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/api/chat/[documentId]/route": "rsc"
+      }
+    },
+    "60c9619da0251a313b176f12525a9cd810ddbd9043": {
+      "workers": {
+        "app/api/chat/[documentId]/route": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Flib%2Fembeddings.ts%22%2C%5B%5B%2240b75191ffba29d42d184cac594b69c72f5a8a4ea2%22%2C%22generateQueryEmbedding%22%5D%2C%5B%226061b4b0266a63367f433d524be9bfb865eae01d6f%22%2C%22generateResponseFromDocument%22%5D%2C%5B%2260c9619da0251a313b176f12525a9cd810ddbd9043%22%2C%22processDocumentQuery%22%5D%2C%5B%22704661934ea74220b9ef7352535d100b8558a4f708%22%2C%22searchVectorDatabase%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/api/chat/[documentId]/route": "rsc"
+      }
+    },
+    "704661934ea74220b9ef7352535d100b8558a4f708": {
+      "workers": {
+        "app/api/chat/[documentId]/route": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fkarthiknadar%2FDesktop%2Fpdfst%2Flib%2Fembeddings.ts%22%2C%5B%5B%2240b75191ffba29d42d184cac594b69c72f5a8a4ea2%22%2C%22generateQueryEmbedding%22%5D%2C%5B%226061b4b0266a63367f433d524be9bfb865eae01d6f%22%2C%22generateResponseFromDocument%22%5D%2C%5B%2260c9619da0251a313b176f12525a9cd810ddbd9043%22%2C%22processDocumentQuery%22%5D%2C%5B%22704661934ea74220b9ef7352535d100b8558a4f708%22%2C%22searchVectorDatabase%22%5D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/api/chat/[documentId]/route": "rsc"
+      }
+    }
+  },
+  "edge": {},
+  "encryptionKey": "9dO2hTl5eRiEi5C4eDFg35YwD0abaBH1jGcI5IBGDvY="
+}
