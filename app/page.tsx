@@ -1,9 +1,14 @@
+'use client'
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, BookOpen, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -86,8 +91,12 @@ export default function Home() {
                 <p>Extract the most important information from your documents. Our AI generates concise summaries to help you grasp key concepts quickly.</p>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full">
-                  Coming Soon
+                <Button 
+                  variant="default" 
+                  className="w-full"
+                  onClick={() => router.push('/summaries')}
+                >
+                  Try Summaries
                 </Button>
               </CardFooter>
             </Card>

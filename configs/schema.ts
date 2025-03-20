@@ -46,3 +46,12 @@ export const chatMessages = pgTable('chat_messages', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+// PDF summaries table
+export const summaries = pgTable('summaries', {
+  id: serial('id').primaryKey(),
+  documentId: serial('document_id').references(() => documents.id).unique(),
+  content: json('content').notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+

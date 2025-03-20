@@ -31,3 +31,5 @@ sketch
 .env.test.local
 .env.production.local
 .env.development
+
+.next

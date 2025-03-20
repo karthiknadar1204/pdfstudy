@@ -49,11 +49,11 @@ export default function RootLayout({
                 <Link href="/chat-with-pdf" className="text-sm font-medium hover:text-primary">
                   Chat with PDF
                 </Link>
-                <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-primary">
-                  Flashcards
+                <Link href="/summaries" className="text-sm font-medium hover:text-primary">
+                  Summaries
                 </Link>
                 <Link href="#" className="text-sm font-medium text-muted-foreground hover:text-primary">
-                  Summaries
+                  Flashcards
                 </Link>
                 <div className="ml-4">
                   <SignedOut>
