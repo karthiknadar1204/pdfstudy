@@ -10,7 +10,8 @@ import { generateDocumentOverview } from "@/actions/summary";
 import { identifyAndSummarizeChapters } from "@/actions/summary";
 import path from "path";
 import fs from "fs/promises";
-import { openai } from '@/configs/ai';
+import { openai,grokClient } from '@/configs/ai';
+// import { grokClient } from '@/configs/grok';
 
 type DocumentData = {
   userId: string; 
@@ -118,9 +119,11 @@ export async function saveDocumentForSummary(documentData: DocumentData) {
         const allContent = docs.map(doc => doc.pageContent).join("\n\n");
         
         // Generate document overview
+        // Creates a high-level overview and key points
         await generateDocumentOverview(documentId, allContent);
         
         // Identify chapters and generate chapter summaries
+        // Identifies the document structure and creates chapter summaries
         await identifyAndSummarizeChapters(documentId, docs);
         
         // Clean up temp file
@@ -160,6 +163,8 @@ export async function saveDocumentForSummary(documentData: DocumentData) {
   }
 }
 
+
+// Sets the order of components (overview = 0, key points = 1)
 async function generateDocumentOverview(
   documentId: number, 
   content: string,
@@ -172,10 +177,22 @@ async function generateDocumentOverview(
   try {
     // Generate an overview of the entire document
     let overviewPrompt = `
-      You are an expert at summarizing academic and professional documents.
-      Please provide a concise overview of the following document.
-      Focus on the main themes, purpose, and scope of the document.
-      Keep your response to 3-4 paragraphs maximum.
+      Analyze this document comprehensively and provide a concise overview.
+      
+      ANALYSIS REQUIREMENTS:
+      - Identify the document type (academic paper, technical manual, business report, etc.)
+      - Determine the primary audience and purpose
+      - Extract the central thesis or main argument
+      - Identify the document's structure and organizational approach
+      - Note any significant methodologies, frameworks, or models used
+      
+      OUTPUT GUIDELINES:
+      - Create 3-4 well-structured paragraphs
+      - First paragraph: Introduce document type, purpose, and central thesis
+      - Middle paragraph(s): Summarize key content areas and significant findings
+      - Final paragraph: Conclude with implications, recommendations, or overall significance
+      - Use precise, domain-appropriate terminology
+      - Maintain objective, analytical tone
     `;
     
     // Add user preferences if provided
@@ -189,23 +206,70 @@ async function generateDocumentOverview(
     
     overviewPrompt += `\n\nDocument content:\n${content.slice(0, 15000)}... [content truncated for length]`;
     
-    const overviewResponse = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const overviewResponse = await grokClient.chat.completions.create({
+      model: "grok-2-latest",
       messages: [
-        { role: "system", content: "You are an expert summarizer that creates concise, accurate document overviews." },
+        { 
+          role: "system", 
+          content: "You are an expert document analyst with advanced capabilities in content extraction, pattern recognition, and synthesis. You excel at identifying document structure, purpose, audience, and key arguments. Your summaries are precise, comprehensive, and tailored to the document's domain and complexity level. CRITICAL: You MUST format your response as a valid JSON object with this exact structure (no markdown, no backticks): { \"summary\": { \"introduction\": \"paragraph about document type and purpose\", \"mainContent\": \"paragraph(s) about key content areas\", \"conclusion\": \"paragraph about implications or significance\" } }" 
+        },
         { role: "user", content: overviewPrompt }
       ],
-      temperature: 0.5,
+      temperature: 0.4,
       max_tokens: 1000,
+      response_format: { type: "json_object" }
     });
     
-    const overview = overviewResponse.choices[0].message.content || "Failed to generate overview.";
+    let overview = "";
+    try {
+      const overviewContent = overviewResponse.choices[0].message.content || "";
+      
+      // First try to parse as JSON
+      try {
+        // Remove any backticks that might be wrapping the JSON
+        const cleanedContent = overviewContent.replace(/^```json\s*|\s*```$/g, '').trim();
+        const overviewJson = JSON.parse(cleanedContent);
+        
+        // Combine the structured parts into a cohesive overview
+        if (overviewJson.summary) {
+          const parts = [];
+          if (overviewJson.summary.introduction) parts.push(overviewJson.summary.introduction);
+          if (overviewJson.summary.mainContent) parts.push(overviewJson.summary.mainContent);
+          if (overviewJson.summary.conclusion) parts.push(overviewJson.summary.conclusion);
+          overview = parts.join("\n\n");
+        } else {
+          // If JSON doesn't have expected structure, use the raw content
+          overview = overviewContent;
+        }
+      } catch (jsonError) {
+        // If JSON parsing fails, use the raw content
+        console.log("Using raw content for overview - JSON parsing failed");
+        overview = overviewContent;
+      }
+    } catch (error) {
+      console.error("Error processing overview response:", error);
+      overview = overviewResponse.choices[0].message.content || "Failed to generate overview.";
+    }
     
     // Generate key points with user preferences
     let keyPointsPrompt = `
-      Based on the document content, extract 5-10 key points or takeaways.
-      Format each point as a bullet point starting with "- ".
-      Focus on the most important concepts, findings, or arguments.
+      Extract the most significant points from this document using deep analytical techniques.
+      
+      ANALYSIS APPROACH:
+      - Identify central claims, findings, or arguments
+      - Extract critical data points, statistics, or evidence
+      - Recognize methodological innovations or limitations
+      - Identify theoretical frameworks or models
+      - Note significant implications or applications
+      - Detect gaps, limitations, or areas for future work
+      
+      OUTPUT REQUIREMENTS:
+      - Provide 5-10 key points in bullet format (start each with "- ")
+      - Arrange points in logical order (most to least important)
+      - Each point should be 1-2 sentences, concise but complete
+      - Use precise terminology appropriate to the document's domain
+      - Include specific details (numbers, dates, names) when relevant
+      - Ensure points collectively represent the document's full scope
     `;
     
     // Add user preferences if provided
@@ -219,17 +283,48 @@ async function generateDocumentOverview(
     
     keyPointsPrompt += `\n\nDocument content:\n${content.slice(0, 15000)}... [content truncated for length]`;
     
-    const keyPointsResponse = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const keyPointsResponse = await grokClient.chat.completions.create({
+      model: "grok-2-latest",
       messages: [
-        { role: "system", content: "You are an expert at identifying and extracting key points from documents." },
+        { 
+          role: "system", 
+          content: "You are an expert information extraction specialist with advanced capabilities in identifying critical information, hierarchical relationships, and conceptual frameworks. You excel at distilling complex documents into precise, well-structured key points that capture the essential content while maintaining nuance and technical accuracy. CRITICAL: You MUST format your response as a valid JSON object with this exact structure (no markdown, no backticks): { \"keyPoints\": [ { \"point\": \"First key point\", \"importance\": \"high|medium|low\" }, { \"point\": \"Second key point\", \"importance\": \"high|medium|low\" }, ... ] }" 
+        },
         { role: "user", content: keyPointsPrompt }
       ],
-      temperature: 0.5,
+      temperature: 0.4,
       max_tokens: 1000,
+      response_format: { type: "json_object" }
     });
     
-    const keyPoints = keyPointsResponse.choices[0].message.content || "Failed to generate key points.";
+    let keyPoints = "";
+    try {
+      const keyPointsContent = keyPointsResponse.choices[0].message.content || "";
+      
+      // First try to parse as JSON
+      try {
+        // Remove any backticks that might be wrapping the JSON
+        const cleanedContent = keyPointsContent.replace(/^```json\s*|\s*```$/g, '').trim();
+        const keyPointsJson = JSON.parse(cleanedContent);
+        
+        // Format key points as bullet points
+        if (keyPointsJson.keyPoints && Array.isArray(keyPointsJson.keyPoints)) {
+          keyPoints = keyPointsJson.keyPoints.map(item => 
+            `- ${item.point}${item.importance ? ` (${item.importance})` : ''}`
+          ).join("\n");
+        } else {
+          // If JSON doesn't have expected structure, use the raw content
+          keyPoints = keyPointsContent;
+        }
+      } catch (jsonError) {
+        // If JSON parsing fails, use the raw content
+        console.log("Using raw content for key points - JSON parsing failed");
+        keyPoints = keyPointsContent;
+      }
+    } catch (error) {
+      console.error("Error processing key points response:", error);
+      keyPoints = keyPointsResponse.choices[0].message.content || "Failed to generate key points.";
+    }
     
     // Create initial summaries object
     const summariesContent = {
@@ -288,7 +383,7 @@ async function identifyAndSummarizeChapters(documentId: number, docs: any[], opt
       where: eq(summaries.documentId, documentId),
     });
     
-    let summariesContent = existingSummary?.content || {
+    const summariesContent = existingSummary?.content || {
       overview: { title: 'Document Overview', content: '', order: 0 },
       keyPoints: { title: 'Key Points', content: '', order: 1 },
       chapters: []
@@ -320,32 +415,45 @@ async function identifyAndSummarizeChapters(documentId: number, docs: any[], opt
     }
     
     // Combine sample pages content for structure analysis
+    // Structure Analysis Prompt - Enhanced for deeper document analysis
     const sampleContent = samplePages.map(doc => doc.pageContent).join("\n\n");
     
-    // Ask GPT to analyze document structure and identify chapter pattern
     const structureAnalysisPrompt = `
-      You are analyzing a large document with ${pageCount} pages to identify its chapter structure.
+      Perform a comprehensive structural analysis of this ${pageCount}-page document.
       
-      First, determine the pattern used for chapter headings in this document.
-      Look for patterns like "Chapter X:", "X. Chapter Title", numbered sections, etc.
+      ANALYSIS OBJECTIVES:
+      1. Identify the precise chapter/section demarcation pattern
+      2. Determine the document's hierarchical organization (chapters, sections, subsections)
+      3. Analyze heading formatting patterns (numbering systems, typography, indentation)
+      4. Detect front matter elements (abstract, TOC, preface, acknowledgments)
+      5. Identify back matter elements (appendices, references, glossary)
+      6. Estimate optimal chapter extraction strategy based on document type and structure
       
-      Then, estimate how many chapters this document likely contains based on the patterns you identified.
+      DOCUMENT TYPE CONSIDERATIONS:
+      - For academic papers: Identify IMRAD structure (Intro, Methods, Results, Discussion)
+      - For textbooks: Detect learning objectives, summaries, and exercise sections
+      - For technical manuals: Identify procedural sections, warnings, and specifications
+      - For business documents: Detect executive summaries, recommendations, and action items
       
-      Return your analysis as JSON with the following format:
+      OUTPUT REQUIREMENTS:
+      Return a precise JSON analysis with:
       {
-        "chapterPattern": "Description of how chapters are marked in this document",
+        "documentType": "academic|textbook|manual|report|other",
+        "chapterPattern": "Detailed description of chapter marking pattern",
+        "headingHierarchy": "Description of heading levels and their formatting",
         "estimatedChapterCount": number,
         "chapterIdentifiers": ["List of text patterns that indicate chapter starts"],
         "shouldIncludeFrontMatter": boolean,
-        "recommendedChapterLimit": number
+        "recommendedChapterLimit": number,
+        "extractionStrategy": "full_chapters|key_sections|hybrid"
       }
       
       Sample content from the document (beginning, middle, and end):
       ${sampleContent.slice(0, 15000)}... [content truncated for length]
     `;
     
-    const structureResponse = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const structureResponse = await grokClient.chat.completions.create({
+      model: "grok-2-latest",
       messages: [
         { role: "system", content: "You are an expert at analyzing document structure and identifying chapter patterns." },
         { role: "user", content: structureAnalysisPrompt }
@@ -364,15 +472,19 @@ async function identifyAndSummarizeChapters(documentId: number, docs: any[], opt
     } catch (parseError) {
       console.error("Error parsing structure analysis:", parseError);
       structureAnalysis = {
+        documentType: "Unknown",
         chapterPattern: "Unknown",
+        headingHierarchy: "Unknown",
         estimatedChapterCount: 10,
         chapterIdentifiers: ["Chapter", "Section"],
         shouldIncludeFrontMatter: false,
-        recommendedChapterLimit: 15
+        recommendedChapterLimit: 15,
+        extractionStrategy: "full_chapters"
       };
     }
     
     // Determine optimal chapter limit based on document size
+    // Chapter Identification Prompt - Enhanced for more precise chapter detection
     const chapterLimit = structureAnalysis.recommendedChapterLimit || 
       (pageCount > 300 ? 20 : pageCount > 100 ? 15 : 10);
     
@@ -381,37 +493,55 @@ async function identifyAndSummarizeChapters(documentId: number, docs: any[], opt
     
     // Ask GPT to identify chapter structure with the insights from structure analysis
     const chapterIdentificationPrompt = `
-      Analyze this document and identify its chapter structure.
+      Perform a detailed chapter structure analysis of this document.
       
-      Document info:
+      DOCUMENT METADATA:
       - Total pages: ${pageCount}
+      - Document type: ${structureAnalysis.documentType || "Unknown"}
       - Chapter pattern: ${structureAnalysis.chapterPattern}
-      - Include front matter (preface, acknowledgments, etc.): ${structureAnalysis.shouldIncludeFrontMatter}
+      - Heading hierarchy: ${structureAnalysis.headingHierarchy || "Standard hierarchy"}
+      - Include front matter: ${structureAnalysis.shouldIncludeFrontMatter}
       
-      Return a JSON array of chapters with the following format:
+      ANALYSIS REQUIREMENTS:
+      1. Identify the most significant chapters/sections based on content importance
+      2. Determine the relative importance of each chapter to the document's overall purpose
+      3. Locate precise chapter boundaries using heading patterns and content transitions
+      4. Assess content density and information value of each chapter
+      
+      CHAPTER SELECTION CRITERIA:
+      - Relevance to document's central thesis or purpose
+      - Information density and unique content value
+      - Structural significance (introductory, methodological, conclusive)
+      - For technical documents: Prioritize methodology, findings, and implementation sections
+      - For academic papers: Prioritize methods, results, and discussion sections
+      - For business documents: Prioritize executive summary, recommendations, and action items
+      
+      OUTPUT FORMAT:
+      Return a JSON array of chapters with:
       {
         "chapters": [
           {
-            "title": "Chapter/Section Title",
-            "startMarker": "Text that indicates the start of this chapter",
-            "importance": "high/medium/low" (estimate how important this chapter is to the overall document)
+            "title": "Precise chapter/section title",
+            "startMarker": "Exact text that indicates the start of this chapter",
+            "importance": "high|medium|low",
+            "contentType": "introduction|methodology|results|discussion|conclusion|appendix|other",
+            "estimatedLength": "short|medium|long"
           }
         ]
       }
       
-      IMPORTANT GUIDELINES:
-      1. Identify AT MOST ${chapterLimit} chapters - focus on the most important ones
-      2. For textbooks or technical documents, prioritize main content chapters over appendices
-      3. For very large documents, focus on major sections rather than every sub-chapter
-      4. Include a "Conclusion" or final chapter if present
-      5. If front matter should be included, add entries for important front matter like "Preface" or "Introduction"
+      CONSTRAINTS:
+      - Identify AT MOST ${chapterLimit} chapters - focus on the most important ones
+      - Ensure selected chapters collectively represent the document's full scope
+      - Include introduction and conclusion chapters if present
+      - For front matter, only include truly significant elements
       
       Document content:
       ${allContent.slice(0, 20000)}... [content truncated for length]
     `;
     
-    const chapterResponse = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const chapterResponse = await grokClient.chat.completions.create({
+      model: "grok-2-latest",
       messages: [
         { role: "system", content: "You are an expert at analyzing document structure and identifying the most important chapters or logical sections." },
         { role: "user", content: chapterIdentificationPrompt }
@@ -590,6 +720,7 @@ async function identifyAndSummarizeChapters(documentId: number, docs: any[], opt
         const chapterIndex = i + batchIndex;
         
         // Skip empty chapters
+        // Chapter Summarization Prompt - Enhanced for deeper chapter analysis
         if (!chapter.content.trim()) {
           console.log(`Skipping empty chapter "${chapter.title}"`);
           return null;
@@ -597,26 +728,80 @@ async function identifyAndSummarizeChapters(documentId: number, docs: any[], opt
         
         try {
           const chapterSummaryPrompt = `
-            You are summarizing a chapter or section of a document titled "${chapter.title}".
-            Please provide a concise summary of the following content.
-            Focus on the main points, key arguments, and important details.
-            Keep your summary to 2-3 paragraphs.
+            Create a comprehensive yet concise summary of this chapter.
+            
+            CHAPTER METADATA:
+            - Title: "${chapter.title}"
+            - Importance: ${chapter.importance || "medium"}
+            - Content type: ${chapter.contentType || "main content"}
+            
+            ANALYSIS APPROACH:
+            1. Identify the chapter's primary purpose and relationship to the overall document
+            2. Extract central arguments, key findings, or critical information
+            3. Identify methodologies, frameworks, or models introduced
+            4. Note significant data, statistics, or evidence presented
+            5. Recognize limitations, constraints, or qualifications mentioned
+            6. Identify connections to other chapters or external references
+            
+            SUMMARY REQUIREMENTS:
+            - Create 2-3 well-structured paragraphs (250-350 words total)
+            - First paragraph: Introduce chapter purpose and main focus
+            - Middle/final paragraphs: Synthesize key content, findings, and significance
+            - Maintain the document's technical terminology and conceptual framework
+            - Preserve critical numerical data, methodological details, and specific findings
+            - Ensure the summary could stand alone while reflecting the chapter's role in the document
             
             Chapter content:
-            ${chapter.content.slice(0, 10000)}... [content truncated for length]
+            ${chapter.content}
+            
+            ${options?.focusTopics?.length ? `Focus on these topics if present: ${options.focusTopics.join(', ')}` : ''}
+            ${options?.customInstructions ? `Additional instructions: ${options.customInstructions}` : ''}
           `;
           
-          const summaryResponse = await openai.chat.completions.create({
-            model: "gpt-4o",
+          const summaryResponse = await grokClient.chat.completions.create({
+            model: "grok-2-latest",
             messages: [
-              { role: "system", content: "You are an expert summarizer that creates concise, accurate chapter summaries." },
+              { 
+                role: "system", 
+                content: "You are an expert summarizer that creates concise, accurate chapter summaries. You excel at identifying the core concepts, key arguments, and significant findings in each chapter while maintaining the document's technical terminology and conceptual framework. CRITICAL: You MUST format your response as a valid JSON object with this exact structure (no markdown, no backticks): { \"chapterSummary\": { \"overview\": \"paragraph introducing chapter purpose\", \"keyContent\": \"paragraph synthesizing main content\", \"significance\": \"paragraph about chapter's importance to overall document\" } }" 
+              },
               { role: "user", content: chapterSummaryPrompt }
             ],
             temperature: 0.5,
             max_tokens: 800,
+            response_format: { type: "json_object" }
           });
           
-          const chapterSummary = summaryResponse.choices[0].message.content || "Failed to generate chapter summary.";
+          let chapterSummary = "";
+          try {
+            const summaryContent = summaryResponse.choices[0].message.content || "";
+            
+            // First try to parse as JSON
+            try {
+              // Remove any backticks that might be wrapping the JSON
+              const cleanedContent = summaryContent.replace(/^```json\s*|\s*```$/g, '').trim();
+              const summaryJson = JSON.parse(cleanedContent);
+              
+              // Combine the structured parts into a cohesive chapter summary
+              if (summaryJson.chapterSummary) {
+                const parts = [];
+                if (summaryJson.chapterSummary.overview) parts.push(summaryJson.chapterSummary.overview);
+                if (summaryJson.chapterSummary.keyContent) parts.push(summaryJson.chapterSummary.keyContent);
+                if (summaryJson.chapterSummary.significance) parts.push(summaryJson.chapterSummary.significance);
+                chapterSummary = parts.join("\n\n");
+              } else {
+                // If JSON doesn't have expected structure, use the raw content
+                chapterSummary = summaryContent;
+              }
+            } catch (jsonError) {
+              // If JSON parsing fails, use the raw content
+              console.log(`Using raw content for chapter "${chapter.title}" - JSON parsing failed`);
+              chapterSummary = summaryContent;
+            }
+          } catch (error) {
+            console.error(`Error processing chapter summary for "${chapter.title}":`, error);
+            chapterSummary = summaryResponse.choices[0].message.content || "Failed to generate chapter summary.";
+          }
           
           console.log(`Generated summary for chapter "${chapter.title}" of document ${documentId}`);
           
