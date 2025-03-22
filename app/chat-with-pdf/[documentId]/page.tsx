@@ -223,8 +223,32 @@ export default function ChatWithPDFDocument() {
                             : "bg-muted"
                         }`}
                       >
-                        {msg.isLoading ? (
-                          <p>Thinking...</p>
+                        {msg.isStreaming ? (
+                          <>
+                            <div>
+                              <p>{msg.content || "Thinking..."}</p>
+                              <span className="inline-block animate-pulse">▋</span>
+                            </div>
+                            
+                            {msg.sources && msg.sources.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-border/50">
+                                <p className="text-xs text-muted-foreground font-medium">Sources:</p>
+                                <div className="mt-1 space-y-1">
+                                  {msg.sources.map((source, idx) => (
+                                    <div key={idx} className="text-xs text-muted-foreground">
+                                      <span className="font-medium">
+                                        Page {source.pageNumber}
+                                        {source.chunkIndex !== undefined && ` (Chunk ${source.chunkIndex + 1})`}
+                                      </span>
+                                      {source.preview && (
+                                        <span className="ml-1 opacity-75">{source.preview}</span>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </>
                         ) : (
                           <>
                             <div>
