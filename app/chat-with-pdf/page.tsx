@@ -53,7 +53,7 @@ export default function ChatWithPDF() {
     try {
       console.log("Starting document upload process with:", result);
       
-      // Use the document title or fallback to the filename without extension
+
       const title = documentTitle.trim() || result.name.replace(/\.[^/.]+$/, "") || "Untitled Document";
       
       const response = await saveDocument({
@@ -73,7 +73,7 @@ export default function ChatWithPDF() {
           description: "Document uploaded successfully",
         });
         
-        // Automatically redirect to the chat page
+
         router.push(`/chat-with-pdf/${response.documentId}`);
       } else {
         toast({
@@ -92,7 +92,7 @@ export default function ChatWithPDF() {
     }
   };
 
-  // Format date to a readable string
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 

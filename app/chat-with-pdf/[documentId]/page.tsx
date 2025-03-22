@@ -79,21 +79,20 @@ export default function ChatWithPDFDocument() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: message.trim(),
-        }),
+        body: JSON.stringify({ message }),
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error('Failed to get response');
       }
       
       const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      
       if (!reader) {
-        throw new Error("Response body is not readable");
+        throw new Error('Failed to read response');
       }
       
-      const decoder = new TextDecoder();
       let sources = [];
       let referencedPages = [];
       
@@ -150,24 +149,18 @@ export default function ChatWithPDFDocument() {
         }
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
       
       // Add error message
       setChatMessages((prev) => [
-        ...prev.filter(msg => !msg.isStreaming),
+        ...prev,
         {
-          content: "Sorry, I encountered an error while processing your request. Please try again.",
+          content: "Sorry, there was an error processing your request. Please try again.",
           isUserMessage: false,
           isError: true,
           timestamp: new Date().toISOString(),
         },
       ]);
-      
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
-      });
     }
   };
 
