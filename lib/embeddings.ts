@@ -39,25 +39,37 @@ export async function searchVectorDatabase(
   try {
     const index = getPineconeIndex();
     
-    // Query the vector database with document filter
-    const results = await index.query({
+    // Query the index with the embedding
+    const queryResponse = await index.query({
       vector: queryEmbedding,
       topK,
       filter: { documentId },
       includeMetadata: true,
     });
     
-    return results.matches.map(match => ({
+    // Log the raw response from Pinecone
+    console.log("=== RAW PINECONE RESPONSE ===");
+    console.log(JSON.stringify(queryResponse.matches.map(m => m.metadata), null, 2));
+    
+    // Format and return the results
+    const results = queryResponse.matches.map(match => ({
+      id: match.id,
       score: match.score,
-      pageNumber: match.metadata?.pageNumber,
-      content: match.metadata?.content,
-      documentId: match.metadata?.documentId,
-      chunkIndex: match.metadata?.chunkIndex,
-      totalChunks: match.metadata?.totalChunks,
+      pageNumber: match.metadata.pageNumber,
+      content: match.metadata.content,
+      chunkIndex: match.metadata.isChunk ? match.metadata.chunkIndex : undefined,
+      isChunk: match.metadata.isChunk,
+      pageUrl: match.metadata.pageUrl // Include the page URL
     }));
+    
+    // Log the formatted results
+    console.log("=== FORMATTED SEARCH RESULTS ===");
+    console.log(JSON.stringify(results, null, 2));
+    
+    return results;
   } catch (error) {
     console.error("Error searching vector database:", error);
-    throw new Error("Failed to search document content");
+    return [];
   }
 }
 

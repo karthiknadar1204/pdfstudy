@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { MessageDisplay } from "@/components/chat/message-display";
+import { PDFViewer } from "@/components/pdf-viewer";
 
 export default function ChatWithPDFDocument() {
   const params = useParams();
@@ -147,11 +148,23 @@ export default function ChatWithPDFDocument() {
               sources = data.sources || [];
               referencedPages = data.referencedPages || [];
               
-              // Update the AI message with metadata
+              // Log the sources to check if pageUrl is present
+              console.log("=== RECEIVED SOURCES IN CLIENT ===");
+              console.log(JSON.stringify(sources.map(s => ({
+                pageNumber: s.pageNumber,
+                pageUrl: s.pageUrl,
+                hasPageUrl: !!s.pageUrl
+              })), null, 2));
+              
+              // Update the AI message with metadata including page URLs
               setChatMessages((prev) => 
                 prev.map((msg) => 
                   msg.id === aiMessageId 
-                    ? { ...msg, sources, referencedPages } 
+                    ? { 
+                        ...msg, 
+                        sources, 
+                        referencedPages 
+                      } 
                     : msg
                 )
               );
@@ -288,9 +301,13 @@ export default function ChatWithPDFDocument() {
             <CardContent className="flex-1 p-0">
               {documentDetails?.fileUrl && (
                 <iframe
-                  src={`${documentDetails.fileUrl}#toolbar=1`}
+                  id="pdf-viewer"
+                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentDetails.fileUrl)}&embedded=true`}
                   className="w-full h-full rounded-b-lg"
                   title="PDF Viewer"
+                  onLoad={() => {
+                    console.log("Google Docs PDF viewer loaded");
+                  }}
                 />
               )}
             </CardContent>

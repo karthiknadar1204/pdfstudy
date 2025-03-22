@@ -85,6 +85,14 @@ export async function POST(
       });
     }
     
+    // Log the results to see if pageUrl is present
+    console.log("=== SEARCH RESULTS IN API ROUTE ===");
+    console.log(JSON.stringify(results.map(r => ({
+      pageNumber: r.pageNumber,
+      pageUrl: r.pageUrl,
+      hasPageUrl: !!r.pageUrl
+    })), null, 2));
+    
     // Prepare context from the search results
     const context = results
       .map(result => `[Page ${result.pageNumber}${result.chunkIndex !== undefined ? `, Chunk ${result.chunkIndex}` : ''}]: ${result.content}`)
@@ -188,14 +196,26 @@ ${context}`;
           // Send the initial response with metadata
           const initialData = {
             type: 'metadata',
-            sources: results.map(result => ({
-              pageNumber: result.pageNumber,
-              score: result.score,
-              preview: result.content?.substring(0, 150) + "...",
-              chunkIndex: result.chunkIndex
-            })),
+            sources: results.map(result => {
+              // Log each source to check pageUrl
+              console.log(`Source for page ${result.pageNumber}:`, { 
+                pageUrl: result.pageUrl,
+                hasPageUrl: !!result.pageUrl 
+              });
+              
+              return {
+                pageNumber: result.pageNumber,
+                score: result.score,
+                preview: result.content?.substring(0, 150) + "...",
+                chunkIndex: result.chunkIndex,
+                pageUrl: result.pageUrl
+              };
+            }),
             referencedPages: pageNumbers
           };
+          
+          console.log("=== INITIAL DATA BEING SENT TO CLIENT ===");
+          console.log(JSON.stringify(initialData, null, 2));
           controller.enqueue(encoder.encode(JSON.stringify(initialData) + '\n'));
           
           // Stream the content chunks

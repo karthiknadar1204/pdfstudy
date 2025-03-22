@@ -70,10 +70,13 @@ async function processPageChunks(documentId: number, page: {
   content: string;
   chunks: string[];
   metadata: any;
-}) {
+}, fileUrl: string) {
   try {
     const pageTokenCount = countTokens(page.content);
     const vectors = [];
+    
+    // Generate the direct page URL
+    const pageUrl = `${fileUrl}#page=${page.pageNumber}`;
     
     // For content-dense pages (more than 3000 tokens), use chunk-level embeddings
     if (pageTokenCount > 3000) {
@@ -96,7 +99,8 @@ async function processPageChunks(documentId: number, page: {
             content: chunkText,
             chunkIndex,
             isChunk: true,
-            totalChunks: tokenChunks.length
+            totalChunks: tokenChunks.length,
+            pageUrl: pageUrl
           }
         });
       });
@@ -120,7 +124,8 @@ async function processPageChunks(documentId: number, page: {
           documentId,
           pageNumber: page.pageNumber,
           content: truncateToTokenLimit(page.content, 4000),
-          isChunk: false
+          isChunk: false,
+          pageUrl: pageUrl
         }
       });
       
@@ -144,8 +149,8 @@ async function processPageChunks(documentId: number, page: {
 }
 
 // Process a batch of pages in parallel
-async function processBatch(batch: any[], documentId: number) {
-  return Promise.all(batch.map(page => processPageChunks(documentId, page)));
+async function processBatch(batch: any[], documentId: number, fileUrl: string) {
+  return Promise.all(batch.map(page => processPageChunks(documentId, page, fileUrl)));
 }
 
 export async function saveDocument(documentData: DocumentData) {
@@ -247,7 +252,7 @@ export async function saveDocument(documentData: DocumentData) {
             const startIdx = i + (j * batchSize);
             if (startIdx < pagesContent.length) {
               const batch = pagesContent.slice(startIdx, Math.min(startIdx + batchSize, pagesContent.length));
-              parallelBatches.push(processBatch(batch, documentId));
+              parallelBatches.push(processBatch(batch, documentId, documentData.fileUrl));
             }
           }
           
