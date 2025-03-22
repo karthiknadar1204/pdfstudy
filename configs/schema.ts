@@ -55,3 +55,28 @@ export const summaries = pgTable('summaries', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
+// Add a new table for document chats
+export const documentChats = pgTable('document_chats', {
+  id: serial('id').primaryKey(),
+  documentId: integer('document_id').notNull().references(() => documents.id, { onDelete: 'cascade' }),
+  userId: text('user_id').notNull(),
+  conversations: json('conversations').notNull().$type<{
+    messages: Array<{
+      id: string;
+      content: string;
+      isUserMessage: boolean;
+      timestamp: string;
+      sources?: Array<{
+        pageNumber: number;
+        score: number;
+        preview: string;
+        chunkIndex: number;
+      }>;
+      referencedPages?: number[];
+    }>;
+    lastUpdated: string;
+  }>(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+

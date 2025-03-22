@@ -18,23 +18,33 @@ export default function ChatWithPDFDocument() {
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
   console.log("parameter", params);
   useEffect(() => {
-    const fetchDocumentDetails = async () => {
+    const fetchDocumentAndChatHistory = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get(`/api/documents/${documentId}`);
-        setDocumentDetails(response.data);
+        
+        // Fetch document details
+        const documentResponse = await axios.get(`/api/documents/${documentId}`);
+        setDocumentDetails(documentResponse.data);
+        
+        // Fetch chat history
+        const chatResponse = await axios.get(`/api/chats/${documentId}`);
+        if (chatResponse.data.messages && Array.isArray(chatResponse.data.messages)) {
+          setChatMessages(chatResponse.data.messages);
+        }
+        
         setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching document:", error);
+        console.error("Error fetching document or chat history:", error);
         toast({
           title: "Error",
-          description: "Failed to load document details",
+          description: "Failed to load document details or chat history",
           variant: "destructive",
         });
         setIsLoading(false);
@@ -42,26 +52,51 @@ export default function ChatWithPDFDocument() {
     };
 
     if (documentId && user) {
-      fetchDocumentDetails();
+      fetchDocumentAndChatHistory();
     }
   }, [documentId, toast, user]);
+
+  // Save chat messages to database
+  const saveChatMessages = async (messages: any[]) => {
+    try {
+      setIsSaving(true);
+      await axios.post(`/api/chats/${documentId}`, { messages });
+      setIsSaving(false);
+    } catch (error) {
+      console.error("Error saving chat messages:", error);
+      // Don't show toast for background saves to avoid disrupting the user
+    }
+  };
+
+  // Debounced save function to avoid too many database writes
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      const saveTimeout = setTimeout(() => {
+        saveChatMessages(chatMessages);
+      }, 2000); // Save after 2 seconds of inactivity
+      
+      return () => clearTimeout(saveTimeout);
+    }
+  }, [chatMessages, documentId]);
 
   const handleSendMessage = async () => {
     if (!message.trim()) return;
     
     // Add user message to chat
     const userMessage = {
+      id: `user-${Date.now()}`,
       content: message,
       isUserMessage: true,
       timestamp: new Date().toISOString(),
     };
     
-    setChatMessages((prev) => [...prev, userMessage]);
+    const updatedMessages = [...chatMessages, userMessage];
+    setChatMessages(updatedMessages);
     setMessage("");
     
     try {
       // Add AI message with loading state
-      const aiMessageId = Date.now().toString();
+      const aiMessageId = `ai-${Date.now()}`;
       const aiMessage = {
         id: aiMessageId,
         content: "",
@@ -143,6 +178,14 @@ export default function ChatWithPDFDocument() {
                     : msg
                 )
               );
+              
+              // Save completed conversation
+              const finalMessages = prev.map(msg => 
+                msg.id === aiMessageId 
+                  ? { ...msg, isStreaming: false } 
+                  : msg
+              );
+              saveChatMessages(finalMessages);
             }
           } catch (e) {
             console.error("Error parsing streaming response:", e);
@@ -153,15 +196,18 @@ export default function ChatWithPDFDocument() {
       console.error('Error sending message:', error);
       
       // Add error message
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          content: "Sorry, there was an error processing your request. Please try again.",
-          isUserMessage: false,
-          isError: true,
-          timestamp: new Date().toISOString(),
-        },
-      ]);
+      const errorMessage = {
+        id: `error-${Date.now()}`,
+        content: "Sorry, there was an error processing your request. Please try again.",
+        isUserMessage: false,
+        isError: true,
+        timestamp: new Date().toISOString(),
+      };
+      
+      setChatMessages((prev) => [...prev, errorMessage]);
+      
+      // Save conversation with error message
+      saveChatMessages([...chatMessages, errorMessage]);
     }
   };
 
@@ -169,7 +215,7 @@ export default function ChatWithPDFDocument() {
     return (
       <div className="container mx-auto py-10 px-4">
         <div className="flex items-center justify-center h-64">
-          <p>Loading document...</p>
+          <p>Loading document and chat history...</p>
         </div>
       </div>
     );
@@ -205,7 +251,7 @@ export default function ChatWithPDFDocument() {
                   </div>
                 ) : (
                   chatMessages.map((msg, index) => (
-                    <MessageDisplay key={index} message={msg} />
+                    <MessageDisplay key={msg.id || index} message={msg} />
                   ))
                 )}
               </div>
@@ -224,6 +270,9 @@ export default function ChatWithPDFDocument() {
                   Send
                 </Button>
               </form>
+              {isSaving && (
+                <p className="text-xs text-muted-foreground mt-2">Saving conversation...</p>
+              )}
             </div>
           </div>
         </ResizablePanel>
