@@ -9,6 +9,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/componen
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
+import { MessageDisplay } from "@/components/chat/message-display";
 
 export default function ChatWithPDFDocument() {
   const params = useParams();
@@ -194,110 +195,35 @@ export default function ChatWithPDFDocument() {
             <CardContent className="flex-1 overflow-auto p-4">
               <div className="space-y-4">
                 {chatMessages.length === 0 ? (
-                  <p className="text-center text-muted-foreground">
-                    Start the conversation by asking a question about your PDF.
-                  </p>
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-center">
+                      <h3 className="text-lg font-medium">Chat with your document</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Ask questions about "{documentDetails?.title || 'your document'}"
+                      </p>
+                    </div>
+                  </div>
                 ) : (
                   chatMessages.map((msg, index) => (
-                    <div
-                      key={index}
-                      className={`flex ${
-                        msg.isUserMessage ? "justify-end" : "justify-start"
-                      } mb-4`}
-                    >
-                      <div
-                        className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                          msg.isUserMessage
-                            ? "bg-primary text-primary-foreground"
-                            : msg.isLoading
-                            ? "bg-muted animate-pulse"
-                            : msg.isError
-                            ? "bg-destructive/10 text-destructive"
-                            : "bg-muted"
-                        }`}
-                      >
-                        {msg.isStreaming ? (
-                          <>
-                            <div>
-                              <p>{msg.content || "Thinking..."}</p>
-                              <span className="inline-block animate-pulse">▋</span>
-                            </div>
-                            
-                            {msg.sources && msg.sources.length > 0 && (
-                              <div className="mt-2 pt-2 border-t border-border/50">
-                                <p className="text-xs text-muted-foreground font-medium">Sources:</p>
-                                <div className="mt-1 space-y-1">
-                                  {msg.sources.map((source, idx) => (
-                                    <div key={idx} className="text-xs text-muted-foreground">
-                                      <span className="font-medium">
-                                        Page {source.pageNumber}
-                                        {source.chunkIndex !== undefined && ` (Chunk ${source.chunkIndex + 1})`}
-                                      </span>
-                                      {source.preview && (
-                                        <span className="ml-1 opacity-75">{source.preview}</span>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <>
-                            <div>
-                              <p>{msg.content}</p>
-                            </div>
-                            
-                            {!msg.isUserMessage && msg.sources && msg.sources.length > 0 && (
-                              <div className="mt-2 pt-2 border-t border-border/50">
-                                <p className="text-xs text-muted-foreground font-medium">Sources:</p>
-                                <div className="mt-1 space-y-1">
-                                  {msg.sources.map((source: any, idx: number) => (
-                                    <div key={idx} className="text-xs text-muted-foreground">
-                                      <span className="font-medium">
-                                        Page {source.pageNumber}
-                                        {source.chunkIndex !== undefined && ` (Chunk ${source.chunkIndex + 1})`}
-                                      </span>
-                                      {source.preview && (
-                                        <span className="ml-1 opacity-75">{source.preview}</span>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            {!msg.isUserMessage && msg.referencedPages && msg.referencedPages.length > 0 && (
-                              <div className="mt-2 pt-2 border-t border-border/50">
-                                <p className="text-xs text-muted-foreground font-medium">
-                                  Referenced Pages: {msg.referencedPages.join(', ')}
-                                </p>
-                              </div>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </div>
+                    <MessageDisplay key={index} message={msg} />
                   ))
                 )}
               </div>
             </CardContent>
             
-            <div className="p-4 border-t">
-              <div className="flex gap-2">
+            <div className="border-t p-4">
+              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2">
                 <Input
-                  placeholder="Ask a question..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
+                  placeholder="Ask a question about your document..."
+                  className="flex-1"
+                  disabled={isLoading}
                 />
-                <Button onClick={handleSendMessage}>Send</Button>
-              </div>
+                <Button type="submit" disabled={isLoading || !message.trim()}>
+                  Send
+                </Button>
+              </form>
             </div>
           </div>
         </ResizablePanel>
