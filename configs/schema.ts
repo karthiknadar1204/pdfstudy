@@ -25,6 +25,8 @@ export const documents = pgTable('documents', {
   fileSize: serial('file_size').notNull(),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
+  hasSummary: boolean('has_summary').default(false).notNull(),
+  hasChat: boolean('has_chat').default(false).notNull()
 });
 
 // Chat sessions table
