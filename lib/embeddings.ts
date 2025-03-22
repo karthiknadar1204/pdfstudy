@@ -1,22 +1,6 @@
 'use server'
 
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Initialize Pinecone client
-const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY || '',
-});
-
-// Get Pinecone index
-const getPineconeIndex = () => {
-  return pinecone.index('pdftest');
-};
+import { openai, pinecone, getPineconeIndex, grokClient } from '@/configs/ai';
 
 /**
  * Generate embeddings for a query string
@@ -68,6 +52,7 @@ export async function searchVectorDatabase(
       pageNumber: match.metadata?.pageNumber,
       content: match.metadata?.content,
       documentId: match.metadata?.documentId,
+      chunkIndex: match.metadata?.chunkIndex,
       totalChunks: match.metadata?.totalChunks,
     }));
   } catch (error) {
@@ -77,28 +62,23 @@ export async function searchVectorDatabase(
 }
 
 /**
- * Process a user query against a specific document
+ * Process a user query to find relevant document sections
  * @param query The user's question
  * @param documentId The document ID to search within
- * @returns Relevant content from the document
+ * @returns Relevant document sections
  */
 export async function processDocumentQuery(query: string, documentId: number) {
   try {
     // Generate embedding for the query
     const queryEmbedding = await generateQueryEmbedding(query);
     
-    // Search for relevant content
-    const searchResults = await searchVectorDatabase(queryEmbedding, documentId, 5);
+    // Search for relevant content in the vector database
+    const results = await searchVectorDatabase(queryEmbedding, documentId, 5);
     
-    // Return the search results
-    return {
-      query,
-      results: searchResults,
-      timestamp: new Date().toISOString(),
-    };
+    return { results };
   } catch (error) {
     console.error("Error processing document query:", error);
-    throw new Error("Failed to process your query");
+    return { results: [] };
   }
 }
 
@@ -123,7 +103,7 @@ export async function generateResponseFromDocument(query: string, documentId: nu
     
     // Prepare context from the search results
     const context = results
-      .map(result => `[Page ${result.pageNumber}]: ${result.content}`)
+      .map(result => `[Page ${result.pageNumber}${result.chunkIndex !== undefined ? `, Chunk ${result.chunkIndex}` : ''}]: ${result.content}`)
       .join('\n\n');
     
     // Get unique page numbers for references
@@ -143,27 +123,33 @@ Format your response using markdown for better readability.
 Document sections:
 ${context}`;
 
-    // Generate a response using the OpenAI API
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    // Generate a streaming response using the Grok API
+    const stream = await grokClient.chat.completions.create({
+      model: "grok-2-latest",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: query }
       ],
       temperature: 0.5,
       max_tokens: 1000,
+      stream: true,
     });
     
-    // Extract the AI's response
-    const aiMessage = response.choices[0].message.content || "I couldn't generate a response based on the document content.";
+    // Collect the streamed response
+    let aiMessage = "";
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content || "";
+      aiMessage += content;
+    }
     
     // Return the response with source information and referenced pages
     return {
-      message: aiMessage,
+      message: aiMessage || "I couldn't generate a response based on the document content.",
       sources: results.map(result => ({
         pageNumber: result.pageNumber,
         score: result.score,
-        preview: result.content?.substring(0, 150) + "..."
+        preview: result.content?.substring(0, 150) + "...",
+        chunkIndex: result.chunkIndex
       })),
       referencedPages: pageNumbers
     };

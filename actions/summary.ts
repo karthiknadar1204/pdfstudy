@@ -10,12 +10,7 @@ import { generateDocumentOverview } from "@/actions/summary";
 import { identifyAndSummarizeChapters } from "@/actions/summary";
 import path from "path";
 import fs from "fs/promises";
-import OpenAI from "openai";
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { openai } from '@/configs/ai';
 
 type DocumentData = {
   userId: string; 

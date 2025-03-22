@@ -59,42 +59,102 @@ export default function ChatWithPDFDocument() {
     setMessage("");
     
     try {
-      // Show loading state
-      const loadingMessage = {
-        content: "Thinking...",
-        isUserMessage: false,
-        isLoading: true,
-        timestamp: new Date().toISOString(),
-      };
-      setChatMessages((prev) => [...prev, loadingMessage]);
-      
-      // Send request to API
-      const response = await axios.post(`/api/chat/${documentId}`, {
-        message: message.trim(),
-      });
-      
-      // Remove loading message
-      setChatMessages((prev) => prev.filter(msg => !msg.isLoading));
-      
-      // Add AI response to chat
+      // Add AI message with loading state
+      const aiMessageId = Date.now().toString();
       const aiMessage = {
-        content: response.data.message,
+        id: aiMessageId,
+        content: "",
         isUserMessage: false,
-        sources: response.data.sources || [],
-        referencedPages: response.data.referencedPages || [],
+        isStreaming: true,
+        sources: [],
+        referencedPages: [],
         timestamp: new Date().toISOString(),
       };
       
       setChatMessages((prev) => [...prev, aiMessage]);
+      
+      // Fetch streaming response
+      const response = await fetch(`/api/chat/${documentId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: message.trim(),
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("Response body is not readable");
+      }
+      
+      const decoder = new TextDecoder();
+      let sources = [];
+      let referencedPages = [];
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const text = decoder.decode(value);
+        const lines = text.split('\n').filter(line => line.trim());
+        
+        for (const line of lines) {
+          try {
+            const data = JSON.parse(line);
+            
+            if (data.type === 'metadata') {
+              sources = data.sources || [];
+              referencedPages = data.referencedPages || [];
+              
+              // Update the AI message with metadata
+              setChatMessages((prev) => 
+                prev.map((msg) => 
+                  msg.id === aiMessageId 
+                    ? { ...msg, sources, referencedPages } 
+                    : msg
+                )
+              );
+            } 
+            else if (data.type === 'content') {
+              // Append content to the AI message
+              setChatMessages((prev) => 
+                prev.map((msg) => 
+                  msg.id === aiMessageId 
+                    ? { ...msg, content: msg.content + data.content } 
+                    : msg
+                )
+              );
+            }
+            else if (data.type === 'error') {
+              throw new Error(data.error);
+            }
+            else if (data.type === 'done') {
+              // Mark streaming as complete
+              setChatMessages((prev) => 
+                prev.map((msg) => 
+                  msg.id === aiMessageId 
+                    ? { ...msg, isStreaming: false } 
+                    : msg
+                )
+              );
+            }
+          } catch (e) {
+            console.error("Error parsing streaming response:", e);
+          }
+        }
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       
-      // Remove loading message
-      setChatMessages((prev) => prev.filter(msg => !msg.isLoading));
-      
       // Add error message
       setChatMessages((prev) => [
-        ...prev,
+        ...prev.filter(msg => !msg.isStreaming),
         {
           content: "Sorry, I encountered an error while processing your request. Please try again.",
           isUserMessage: false,

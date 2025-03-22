@@ -10,24 +10,8 @@ import path from 'path';
 import { storage } from '@/configs/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import OpenAI from "openai";
-import { Pinecone } from "@pinecone-database/pinecone";
+import { openai, pinecone, getPineconeIndex, grokClient } from '@/configs/ai';
 import { truncateToTokenLimit, splitTextIntoTokenChunks, countTokens } from "@/utils/tokenizer";
-
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Initialize Pinecone client
-const pinecone = new Pinecone({
-  apiKey: process.env.PINECONE_API_KEY || '',
-});
-
-// Get Pinecone index
-const getPineconeIndex = () => {
-  return pinecone.index('pdftest');
-};
 
 type DocumentData = {
   userId: string; 

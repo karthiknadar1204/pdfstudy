@@ -3,6 +3,7 @@
 import OpenAI from "openai";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { truncateToTokenLimit, splitTextIntoTokenChunks } from "./tokenizer";
+import { grokClient } from "@/configs/ai";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -154,8 +155,8 @@ Document sections:
 ${context}`;
 
     // Generate a response using the OpenAI API
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+    const response = await grokClient.chat.completions.create({
+      model: "grok-2-latest",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: query }

@@ -3,7 +3,8 @@ import { db } from "@/configs/db";
 import { documents, users } from "@/configs/schema";
 import { eq } from "drizzle-orm";
 import { getAuth } from "@clerk/nextjs/server";
-import { generateResponseFromDocument } from "@/lib/embeddings";
+import { generateResponseFromDocument, processDocumentQuery } from "@/lib/embeddings";
+import { grokClient } from "@/configs/ai";
 
 export async function POST(
   request: NextRequest,
@@ -73,13 +74,105 @@ export async function POST(
       );
     }
 
-    // Generate a response based on the document content
-    const response = await generateResponseFromDocument(message, documentId);
+    // Process the query to get relevant document sections
+    const { results } = await processDocumentQuery(message, documentId);
+    
+    if (!results || results.length === 0) {
+      return NextResponse.json({
+        message: "I couldn't find relevant information in this document to answer your question. Could you please rephrase or ask something else about the document?",
+        sources: [],
+        referencedPages: []
+      });
+    }
+    
+    // Prepare context from the search results
+    const context = results
+      .map(result => `[Page ${result.pageNumber}${result.chunkIndex !== undefined ? `, Chunk ${result.chunkIndex}` : ''}]: ${result.content}`)
+      .join('\n\n');
+    
+    // Get unique page numbers for references
+    const pageNumbers = [...new Set(results.map(result => result.pageNumber))].sort((a, b) => a - b);
+    
+    // Create a system prompt for the AI
+    const systemPrompt = `You are an AI assistant that helps users understand PDF documents. 
+You have access to specific sections of a document that are relevant to the user's query.
+Answer the user's question based ONLY on the provided document sections.
+If the information in the document sections is not sufficient to answer the question, 
+acknowledge that and don't make up information.
 
-    return NextResponse.json({
-      message: response.message,
-      sources: response.sources,
-      referencedPages: response.referencedPages
+IMPORTANT: When referring to information, you MUST cite the specific page numbers using the format "According to page X..." or "[Page X]".
+Be sure to mention ALL relevant page numbers that contain information used in your answer.
+Format your response using markdown for better readability.
+
+Document sections:
+${context}`;
+
+    // Create a streaming response
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Generate a streaming response using the Grok API
+          const grokStream = await grokClient.chat.completions.create({
+            model: "grok-2-latest",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: message }
+            ],
+            temperature: 0.5,
+            max_tokens: 1000,
+            stream: true,
+          });
+          
+          // Send the initial response with metadata
+          const initialData = {
+            type: 'metadata',
+            sources: results.map(result => ({
+              pageNumber: result.pageNumber,
+              score: result.score,
+              preview: result.content?.substring(0, 150) + "...",
+              chunkIndex: result.chunkIndex
+            })),
+            referencedPages: pageNumbers
+          };
+          controller.enqueue(encoder.encode(JSON.stringify(initialData) + '\n'));
+          
+          // Stream the content chunks
+          for await (const chunk of grokStream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+              const data = {
+                type: 'content',
+                content: content
+              };
+              controller.enqueue(encoder.encode(JSON.stringify(data) + '\n'));
+            }
+          }
+          
+          // Signal completion
+          const finalData = {
+            type: 'done'
+          };
+          controller.enqueue(encoder.encode(JSON.stringify(finalData) + '\n'));
+          controller.close();
+        } catch (error) {
+          console.error("Error in streaming:", error);
+          const errorData = {
+            type: 'error',
+            error: 'An error occurred while generating the response'
+          };
+          controller.enqueue(encoder.encode(JSON.stringify(errorData) + '\n'));
+          controller.close();
+        }
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     });
   } catch (error) {
     console.error("Error processing chat:", error);
