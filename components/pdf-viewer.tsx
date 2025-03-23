@@ -10,6 +10,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
   
   // Function to navigate to a specific page
   const goToPage = (pageNumber: number) => {
@@ -17,6 +18,9 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
       console.log(`PDF Viewer: Navigating to page ${pageNumber}`);
       
       try {
+        // Set navigating state to show transition effect
+        setIsNavigating(true);
+        
         // Create a new URL with the page parameter
         const baseUrl = fileUrl.split('#')[0];
         const newSrc = `${baseUrl}#page=${pageNumber}`;
@@ -30,10 +34,16 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
             iframeRef.current.src = newSrc;
             console.log(`Set iframe src to: ${newSrc}`);
             setCurrentPage(pageNumber);
+            
+            // Reset navigating state after a delay to complete the transition
+            setTimeout(() => {
+              setIsNavigating(false);
+            }, 300);
           }
         }, 50);
       } catch (error) {
         console.error("Error navigating to page:", error);
+        setIsNavigating(false);
       }
     }
   };
@@ -65,6 +75,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
             variant="outline" 
             size="sm"
             onClick={() => goToPage(Math.max(1, currentPage - 1))}
+            disabled={isNavigating}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Previous
@@ -76,6 +87,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
             variant="outline" 
             size="sm"
             onClick={() => goToPage(currentPage + 1)}
+            disabled={isNavigating}
           >
             Next
             <ChevronRight className="h-4 w-4 ml-1" />
@@ -83,16 +95,23 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
         </div>
       </div>
       
-      <iframe
-        ref={iframeRef}
-        id="pdf-viewer"
-        src={`${fileUrl}#page=1`}
-        className="flex-1 w-full border-0"
-        title="PDF Viewer"
-        onLoad={() => {
-          console.log("PDF viewer iframe loaded");
-        }}
-      />
+      <div className="relative flex-1">
+        {isNavigating && (
+          <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10 transition-opacity duration-300">
+            <div className="animate-pulse">Navigating to page {currentPage}...</div>
+          </div>
+        )}
+        <iframe
+          ref={iframeRef}
+          id="pdf-viewer"
+          src={`${fileUrl}#page=1`}
+          className={`w-full h-full border-0 transition-opacity duration-300 ${isNavigating ? 'opacity-30' : 'opacity-100'}`}
+          title="PDF Viewer"
+          onLoad={() => {
+            console.log("PDF viewer iframe loaded");
+          }}
+        />
+      </div>
     </div>
   );
 } 
