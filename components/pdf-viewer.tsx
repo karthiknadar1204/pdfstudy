@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PDFViewerProps {
   fileUrl: string;
@@ -13,10 +14,27 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
   // Function to navigate to a specific page
   const goToPage = (pageNumber: number) => {
     if (iframeRef.current) {
-      // Update the iframe src with the page parameter
-      const baseUrl = fileUrl.split('#')[0];
-      iframeRef.current.src = `${baseUrl}#page=${pageNumber}`;
-      setCurrentPage(pageNumber);
+      console.log(`PDF Viewer: Navigating to page ${pageNumber}`);
+      
+      try {
+        // Create a new URL with the page parameter
+        const baseUrl = fileUrl.split('#')[0];
+        const newSrc = `${baseUrl}#page=${pageNumber}`;
+        
+        // Force a reload by temporarily setting to about:blank
+        iframeRef.current.src = 'about:blank';
+        
+        // After a short delay, set to the new URL
+        setTimeout(() => {
+          if (iframeRef.current) {
+            iframeRef.current.src = newSrc;
+            console.log(`Set iframe src to: ${newSrc}`);
+            setCurrentPage(pageNumber);
+          }
+        }, 50);
+      } catch (error) {
+        console.error("Error navigating to page:", error);
+      }
     }
   };
   
@@ -24,12 +42,19 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.type === 'scrollToPage') {
-        goToPage(event.data.pageNumber);
+        const pageNumber = event.data.pageNumber;
+        console.log(`PDF Viewer received request to navigate to page ${pageNumber}`);
+        goToPage(pageNumber);
       }
     };
     
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    console.log("PDF Viewer: Added message event listener");
+    
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      console.log("PDF Viewer: Removed message event listener");
+    };
   }, []);
   
   return (
@@ -41,6 +66,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
             size="sm"
             onClick={() => goToPage(Math.max(1, currentPage - 1))}
           >
+            <ChevronLeft className="h-4 w-4 mr-1" />
             Previous
           </Button>
           <span className="text-sm">
@@ -52,6 +78,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
             onClick={() => goToPage(currentPage + 1)}
           >
             Next
+            <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
       </div>
@@ -63,7 +90,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
         className="flex-1 w-full border-0"
         title="PDF Viewer"
         onLoad={() => {
-          console.log("PDF viewer loaded");
+          console.log("PDF viewer iframe loaded");
         }}
       />
     </div>

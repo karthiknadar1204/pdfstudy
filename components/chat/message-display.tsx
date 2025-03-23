@@ -39,35 +39,10 @@ export function MessageDisplay({ message }: MessageDisplayProps) {
 
   // Function to scroll to a specific page in the PDF viewer
   const scrollToPage = (pageNumber: number) => {
-    // Try to use window.postMessage to communicate with our custom PDF viewer
-    window.postMessage({ type: 'scrollToPage', pageNumber }, '*');
+    console.log(`Requesting navigation to page ${pageNumber}`);
     
-    // Also try to directly access the iframe as a fallback
-    const pdfViewer = document.getElementById('pdf-viewer');
-    if (pdfViewer) {
-      try {
-        console.log(`Attempting to navigate to page ${pageNumber}`);
-        
-        // For Google Docs viewer, we need a different approach
-        if (pdfViewer.src.includes('docs.google.com')) {
-          // Google Docs viewer doesn't support direct page navigation
-          // We can only open the PDF directly
-          window.open(pageUrlMap[pageNumber], '_blank');
-          return;
-        }
-        
-        // For direct PDF viewing
-        const currentSrc = pdfViewer.getAttribute('src') || '';
-        const baseUrl = currentSrc.split('#')[0];
-        pdfViewer.setAttribute('src', `${baseUrl}#page=${pageNumber}`);
-        
-        console.log(`Setting iframe src to: ${baseUrl}#page=${pageNumber}`);
-      } catch (error) {
-        console.error("Error scrolling to page:", error);
-      }
-    } else {
-      console.warn("PDF viewer element not found");
-    }
+    // Use window.postMessage to communicate with our custom PDF viewer
+    window.postMessage({ type: 'scrollToPage', pageNumber }, '*');
   };
 
   return (

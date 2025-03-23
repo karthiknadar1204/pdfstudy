@@ -10,39 +10,10 @@ interface ReferencedPagesProps {
 export function ReferencedPages({ pages, pageUrlMap }: ReferencedPagesProps) {
   // Function to scroll to a specific page in the PDF viewer
   const scrollToPage = (pageNumber: number) => {
-    // Get the PDF viewer iframe
-    const pdfViewer = document.getElementById('pdf-viewer');
+    console.log(`Requesting navigation to page ${pageNumber}`);
     
-    if (pdfViewer) {
-      try {
-        // Try to access the iframe's contentWindow
-        if (pdfViewer.contentWindow) {
-          // Try to use postMessage first
-          pdfViewer.contentWindow.postMessage({ type: 'scrollToPage', pageNumber }, '*');
-        }
-        
-        // Also update the iframe src as a fallback method
-        const currentSrc = pdfViewer.getAttribute('src') || '';
-        const baseUrl = currentSrc.split('#')[0];
-        
-        // Update the iframe src with the page parameter
-        pdfViewer.setAttribute('src', `${baseUrl}#page=${pageNumber}`);
-        
-        console.log(`Navigating to page ${pageNumber}`);
-      } catch (error) {
-        console.error("Error scrolling to page:", error);
-      }
-    } else {
-      console.warn("PDF viewer element not found");
-      
-      // Last resort: try to use the page URL directly
-      if (pageUrlMap[pageNumber]) {
-        const url = pageUrlMap[pageNumber];
-        // Extract just the page parameter if it exists
-        const pageParam = url.includes('#page=') ? url.split('#page=')[1] : pageNumber;
-        window.location.hash = `page=${pageParam}`;
-      }
-    }
+    // Use window.postMessage to communicate with our custom PDF viewer
+    window.postMessage({ type: 'scrollToPage', pageNumber }, '*');
   };
 
   return (

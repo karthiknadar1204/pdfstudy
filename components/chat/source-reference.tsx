@@ -15,40 +15,10 @@ interface SourceReferenceProps {
 export function SourceReference({ source }: SourceReferenceProps) {
   // Function to scroll to a specific page in the PDF viewer
   const scrollToPage = (pageNumber: number) => {
-    // Get the PDF viewer iframe
-    const pdfViewer = document.getElementById('pdf-viewer');
+    console.log(`Requesting navigation to page ${pageNumber}`);
     
-    if (pdfViewer) {
-      try {
-        console.log(`Attempting to navigate to page ${pageNumber}`);
-        
-        // For Firebase Storage PDFs, we need to completely reload the iframe with the page parameter
-        const currentSrc = pdfViewer.getAttribute('src') || '';
-        
-        // Extract the base URL without any hash parameters
-        const baseUrl = currentSrc.split('#')[0];
-        
-        // Create a new URL with just the page parameter
-        // Using view=FitH to ensure the page fits horizontally in the viewer
-        const newSrc = `${baseUrl}#page=${pageNumber}&view=FitH`;
-        
-        console.log(`Setting iframe src to: ${newSrc}`);
-        
-        // Replace the iframe src to navigate to the specific page
-        pdfViewer.setAttribute('src', newSrc);
-        
-      } catch (error) {
-        console.error("Error scrolling to page:", error);
-      }
-    } else {
-      console.warn("PDF viewer element not found");
-      
-      // Last resort: try to use the page URL directly
-      if (source.pageUrl) {
-        const url = source.pageUrl;
-        window.open(`${url.split('#')[0]}#page=${pageNumber}`, '_blank');
-      }
-    }
+    // Use window.postMessage to communicate with our custom PDF viewer
+    window.postMessage({ type: 'scrollToPage', pageNumber }, '*');
   };
 
   return (

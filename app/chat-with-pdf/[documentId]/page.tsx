@@ -300,15 +300,7 @@ export default function ChatWithPDFDocument() {
             </CardHeader>
             <CardContent className="flex-1 p-0">
               {documentDetails?.fileUrl && (
-                <iframe
-                  id="pdf-viewer"
-                  src={`https://docs.google.com/viewer?url=${encodeURIComponent(documentDetails.fileUrl)}&embedded=true`}
-                  className="w-full h-full rounded-b-lg"
-                  title="PDF Viewer"
-                  onLoad={() => {
-                    console.log("Google Docs PDF viewer loaded");
-                  }}
-                />
+                <PDFViewer fileUrl={documentDetails.fileUrl} />
               )}
             </CardContent>
           </div>
