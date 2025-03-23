@@ -11,6 +11,7 @@ import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { MessageDisplay } from "@/components/chat/message-display";
 import { PDFViewer } from "@/components/pdf-viewer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function ChatWithPDFDocument() {
   const params = useParams();
@@ -240,21 +241,22 @@ export default function ChatWithPDFDocument() {
         Chat with: {documentDetails?.title || "PDF Document"}
       </h1>
       
-      <ResizablePanelGroup direction="horizontal" className="min-h-[600px] rounded-lg border">
+      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-150px)] rounded-lg border">
         {/* Chat Panel */}
         <ResizablePanel defaultSize={40} minSize={30}>
           <div className="flex flex-col h-full">
-            <CardHeader className="px-4">
+            <CardHeader className="px-4 shrink-0">
               <CardTitle>Chat</CardTitle>
               <CardDescription>
                 Ask questions about your document
               </CardDescription>
             </CardHeader>
             
-            <CardContent className="flex-1 overflow-auto p-4">
-              <div className="space-y-4">
+            {/* Chat Messages - Scrollable Area */}
+            <ScrollArea className="flex-1">
+              <div className="p-4 space-y-4">
                 {chatMessages.length === 0 ? (
-                  <div className="flex h-full items-center justify-center">
+                  <div className="flex h-40 items-center justify-center">
                     <div className="text-center">
                       <h3 className="text-lg font-medium">Chat with your document</h3>
                       <p className="text-sm text-muted-foreground">
@@ -268,9 +270,10 @@ export default function ChatWithPDFDocument() {
                   ))
                 )}
               </div>
-            </CardContent>
+            </ScrollArea>
             
-            <div className="border-t p-4">
+            {/* Message Input - Fixed at Bottom */}
+            <div className="border-t p-4 shrink-0 bg-background">
               <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2">
                 <Input
                   value={message}
@@ -294,11 +297,11 @@ export default function ChatWithPDFDocument() {
         
         {/* PDF Viewer Panel */}
         <ResizablePanel defaultSize={60}>
-          <div className="h-full flex flex-col">
-            <CardHeader className="px-4">
+          <div className="h-full flex flex-col overflow-hidden">
+            <CardHeader className="px-4 shrink-0">
               <CardTitle>Document Viewer</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 p-0">
+            <CardContent className="flex-1 p-0 overflow-hidden">
               {documentDetails?.fileUrl && (
                 <PDFViewer fileUrl={documentDetails.fileUrl} />
               )}

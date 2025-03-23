@@ -68,8 +68,8 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
   }, []);
   
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-2 border-b">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between p-2 border-b shrink-0">
         <div className="flex items-center space-x-2">
           <Button 
             variant="outline" 
@@ -95,7 +95,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
         </div>
       </div>
       
-      <div className="relative flex-1">
+      <div className="relative flex-1 overflow-hidden">
         {isNavigating && (
           <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10 transition-opacity duration-300">
             <div className="animate-pulse">Navigating to page {currentPage}...</div>
