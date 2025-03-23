@@ -67,12 +67,15 @@ export const documentChats = pgTable('document_chats', {
       id: string;
       content: string;
       isUserMessage: boolean;
+      isStreaming?: boolean;
+      isError?: boolean;
       timestamp: string;
       sources?: Array<{
         pageNumber: number;
         score: number;
         preview: string;
-        chunkIndex: number;
+        chunkIndex?: number;
+        pageUrl?: string;
       }>;
       referencedPages?: number[];
     }>;

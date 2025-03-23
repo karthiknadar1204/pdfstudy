@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/configs/db";
-import { documents, users } from "@/configs/schema";
-import { eq } from "drizzle-orm";
+import { documents, users, documentChats } from "@/configs/schema";
+import { eq, and } from "drizzle-orm";
 import { getAuth } from "@clerk/nextjs/server";
 import { generateResponseFromDocument, processDocumentQuery } from "@/lib/embeddings";
 import { grokClient } from "@/configs/ai";
+import { truncateToTokenLimit } from "@/utils/tokenizer";
 
 export async function POST(
   request: NextRequest,
@@ -65,7 +66,7 @@ export async function POST(
 
     // Parse the request body
     const body = await request.json();
-    const { message } = body;
+    const { message, previousMessages = [] } = body;
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -101,6 +102,14 @@ export async function POST(
     // Get unique page numbers for references
     const pageNumbers = [...new Set(results.map(result => result.pageNumber))].sort((a, b) => a - b);
     
+    // Format previous messages for the AI context
+    const conversationHistory = previousMessages
+      .filter(msg => msg.content && (msg.isUserMessage !== undefined))
+      .map(msg => ({
+        role: msg.isUserMessage ? "user" : "assistant",
+        content: msg.content
+      }));
+    
     // Create a comprehensive system prompt for the AI
     const systemPrompt = `You are an advanced AI assistant specialized in analyzing and explaining PDF documents. 
 You have been given specific sections of a document that are relevant to the user's query.
@@ -121,6 +130,13 @@ DOCUMENT CONTEXT GUIDELINES:
 - For travel documents, identify key details like passenger names, dates, destinations, and booking references
 - For financial documents, highlight important figures, payment terms, and due dates
 - For academic papers, focus on methodology, findings, and conclusions
+
+CONVERSATION MEMORY:
+- You have access to the conversation history between you and the user
+- Use this history to understand the context of follow-up questions
+- When the user refers to "the previous answer" or asks to "explain more about that", refer to your earlier responses
+- Maintain consistency with your previous explanations
+- If the user asks for clarification about something you mentioned earlier, provide it based on the document content
 
 CITATION REQUIREMENTS:
 - You MUST cite specific page numbers when referencing information using one of these formats:
@@ -181,13 +197,17 @@ ${context}`;
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          // Prepare messages array with system prompt, conversation history, and current query
+          const messages = [
+            { role: "system", content: systemPrompt },
+            ...conversationHistory,
+            { role: "user", content: message }
+          ];
+          
           // Generate a streaming response using the Grok API
           const grokStream = await grokClient.chat.completions.create({
             model: "grok-2-latest",
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: message }
-            ],
+            messages: messages,
             temperature: 0.5,
             max_tokens: 1000,
             stream: true,

@@ -67,6 +67,59 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
     };
   }, []);
   
+  // Add an effect to detect total pages when the PDF loads
+  useEffect(() => {
+    // Function to attempt to get total pages from the PDF viewer
+    const detectTotalPages = () => {
+      if (iframeRef.current) {
+        try {
+          // Try to access the PDF viewer's document to get page count
+          const iframeWindow = iframeRef.current.contentWindow;
+          
+          if (iframeWindow) {
+            // Check if PDF.js is loaded in the iframe
+            if (iframeWindow.PDFViewerApplication) {
+              const pdfViewer = iframeWindow.PDFViewerApplication;
+              
+              // Check if the PDF is loaded
+              if (pdfViewer.pdfDocument) {
+                const pageCount = pdfViewer.pagesCount || pdfViewer.pdfDocument.numPages;
+                console.log(`PDF Viewer: Detected ${pageCount} total pages`);
+                setTotalPages(pageCount);
+              } else {
+                // PDF document not yet loaded, try again later
+                setTimeout(detectTotalPages, 500);
+              }
+            } else {
+              // PDF.js not yet initialized, try again later
+              setTimeout(detectTotalPages, 500);
+            }
+          }
+        } catch (error) {
+          console.error("Error detecting total pages:", error);
+        }
+      }
+    };
+    
+    // Set up a load event listener for the iframe
+    const handleIframeLoad = () => {
+      console.log("PDF viewer iframe loaded, attempting to detect total pages");
+      // Give the PDF.js viewer a moment to initialize
+      setTimeout(detectTotalPages, 1000);
+    };
+    
+    const iframe = iframeRef.current;
+    if (iframe) {
+      iframe.addEventListener('load', handleIframeLoad);
+    }
+    
+    return () => {
+      if (iframe) {
+        iframe.removeEventListener('load', handleIframeLoad);
+      }
+    };
+  }, [fileUrl]);
+  
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="flex items-center justify-between p-2 border-b shrink-0">
@@ -75,7 +128,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
             variant="outline" 
             size="sm"
             onClick={() => goToPage(Math.max(1, currentPage - 1))}
-            disabled={isNavigating}
+            disabled={isNavigating || currentPage <= 1}
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
             Previous
@@ -87,7 +140,7 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
             variant="outline" 
             size="sm"
             onClick={() => goToPage(currentPage + 1)}
-            disabled={isNavigating}
+            disabled={isNavigating || (totalPages > 0 && currentPage >= totalPages)}
           >
             Next
             <ChevronRight className="h-4 w-4 ml-1" />

@@ -111,13 +111,19 @@ export default function ChatWithPDFDocument() {
       
       setChatMessages((prev) => [...prev, aiMessage]);
       
+      // Get previous messages for context (limit to last 10 for token efficiency)
+      const previousMessages = chatMessages.slice(-10);
+      
       // Fetch streaming response
       const response = await fetch(`/api/chat/${documentId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ 
+          message,
+          previousMessages 
+        }),
       });
       
       if (!response.ok) {
@@ -149,14 +155,6 @@ export default function ChatWithPDFDocument() {
               sources = data.sources || [];
               referencedPages = data.referencedPages || [];
               
-              // Log the sources to check if pageUrl is present
-              console.log("=== RECEIVED SOURCES IN CLIENT ===");
-              console.log(JSON.stringify(sources.map(s => ({
-                pageNumber: s.pageNumber,
-                pageUrl: s.pageUrl,
-                hasPageUrl: !!s.pageUrl
-              })), null, 2));
-              
               // Update the AI message with metadata including page URLs
               setChatMessages((prev) => 
                 prev.map((msg) => 
@@ -169,7 +167,7 @@ export default function ChatWithPDFDocument() {
                     : msg
                 )
               );
-            } 
+            }
             else if (data.type === 'content') {
               // Append content to the AI message
               setChatMessages((prev) => 
