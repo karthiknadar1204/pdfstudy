@@ -1,10 +1,110 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronLeft, Plus, ChevronDown, ChevronUp, FileText, Check } from "lucide-react";
+import { ChevronRight, ChevronLeft, Plus, ChevronDown, ChevronUp, FileText, Check, Upload } from "lucide-react";
 import { useFolderStore } from "@/store/useFolderStore";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { FirebasePdfUploader } from "@/components/firebase-pdf-uploader";
+import { useToast } from "@/hooks/use-toast";
+import { saveDocument } from "@/actions/document";
+import { useUser } from "@clerk/nextjs";
+
+interface UploadDialogProps {
+  folderId: number;
+  folderName: string;
+  onUploadComplete: () => Promise<void>;
+}
+
+const UploadDialog = ({ folderId, folderName, onUploadComplete }: UploadDialogProps) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [documentTitle, setDocumentTitle] = useState("");
+  const { toast } = useToast();
+  const router = useRouter();
+  const { user } = useUser();
+
+  const handleUpload = async (result: any) => {
+    if (!user || !result) return;
+    
+    try {
+      const title = documentTitle.trim() || result.name.replace(/\.[^/.]+$/, "") || "Untitled Document";
+      
+      const response = await saveDocument({
+        userId: user.id,
+        title: title,
+        fileName: result.name,
+        fileUrl: result.url,
+        fileKey: result.key,
+        fileSize: result.size,
+        folderId: folderId,
+      });
+      
+      if (response.success && response.documentId) {
+        toast({
+          title: "Success",
+          description: "Document uploaded successfully",
+        });
+        
+        await onUploadComplete();
+        
+        router.push(`/chat-with-pdf/${response.documentId}`);
+      } else {
+        toast({
+          title: "Error",
+          description: response.message || "Failed to save document",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving document:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save document",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Upload to {folderName}</DialogTitle>
+      </DialogHeader>
+      <div className="space-y-4 py-4">
+        <div>
+          <label htmlFor="documentTitle" className="block text-sm font-medium mb-1">
+            Document Title (optional)
+          </label>
+          <Input
+            id="documentTitle"
+            placeholder="Enter a title for your document"
+            value={documentTitle}
+            onChange={(e) => setDocumentTitle(e.target.value)}
+          />
+        </div>
+        
+        <div className="border-2 border-dashed rounded-lg p-4">
+          <FirebasePdfUploader
+            onUploadBegin={() => setIsUploading(true)}
+            onUploadComplete={(result) => {
+              setIsUploading(false);
+              handleUpload(result);
+            }}
+            onUploadError={(error) => {
+              setIsUploading(false);
+              toast({
+                title: "Upload Error",
+                description: error.message,
+                variant: "destructive",
+              });
+            }}
+          />
+        </div>
+      </div>
+    </DialogContent>
+  );
+};
 
 interface FolderItemProps {
   folder: {
@@ -15,9 +115,10 @@ interface FolderItemProps {
   isSelected: boolean;
   onSelect: () => void;
   currentDocumentId?: number;
+  onUploadComplete: () => Promise<void>;
 }
 
-const FolderItem = ({ folder, isSelected, onSelect, currentDocumentId }: FolderItemProps) => {
+const FolderItem = ({ folder, isSelected, onSelect, currentDocumentId, onUploadComplete }: FolderItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const router = useRouter();
 
@@ -40,16 +141,35 @@ const FolderItem = ({ folder, isSelected, onSelect, currentDocumentId }: FolderI
           {isSelected && <Check className="h-4 w-4 mr-2" />}
           <span className="truncate">{folder.name}</span>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsExpanded(!isExpanded);
-          }}
-        >
-          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </Button>
+        <div className="flex items-center">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 mr-1"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Upload className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <UploadDialog 
+              folderId={folder.id} 
+              folderName={folder.name}
+              onUploadComplete={onUploadComplete}
+            />
+          </Dialog>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsExpanded(!isExpanded);
+            }}
+          >
+            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
       
       {isExpanded && folder.documents && folder.documents.length > 0 && (
@@ -82,21 +202,21 @@ export function DocumentSidebar({ currentDocumentId }: DocumentSidebarProps) {
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  useEffect(() => {
-    const fetchFolders = async () => {
-      try {
-        const response = await fetch('/api/folders');
-        if (response.ok) {
-          const data = await response.json();
-          setFolders(data);
-        }
-      } catch (error) {
-        console.error('Error fetching folders:', error);
+  const fetchFolders = async () => {
+    try {
+      const response = await fetch('/api/folders');
+      if (response.ok) {
+        const data = await response.json();
+        setFolders(data);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching folders:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchFolders();
-  }, [setFolders]);
+  }, []);
 
   const handleCreateFolder = async () => {
     if (!newFolderName.trim()) return;
@@ -112,9 +232,9 @@ export function DocumentSidebar({ currentDocumentId }: DocumentSidebarProps) {
 
       if (response.ok) {
         const folder = await response.json();
-        useFolderStore.getState().addFolder(folder);
         setNewFolderName("");
         setIsCreatingFolder(false);
+        await fetchFolders();
         selectFolder(folder.id);
       }
     } catch (error) {
@@ -151,6 +271,7 @@ export function DocumentSidebar({ currentDocumentId }: DocumentSidebarProps) {
               isSelected={folder.id === selectedFolderId}
               onSelect={() => handleFolderSelect(folder.id)}
               currentDocumentId={currentDocumentId}
+              onUploadComplete={fetchFolders}
             />
           ))}
 

@@ -1,0 +1,82 @@
+{
+  "documentId": 4,
+  "pageCount": 2,
+  "pages": [
+    {
+      "pageNumber": 1,
+      "content": "KARTHIK NADAR\n+91 9372901773   —   Mumbai, India⋄karthiknadar1204@gmail.com   —   LinkedIn   —   GitHub\nEDUCATION\nBachelor of Computer Science and Engineering\nVellore Institute of Technology2021 - 2025\nFinal Year\nSKILLS\nTechnical SkillsNext.js, React.js, Express.js, Drizzle ORM, Prisma ORM, Firebase, Tailwind CSS, Docker,\nKubernetes,  Jenkins,  GitHub  Actions,  Python,  FastAPI,  Redis,  LangChain,  Pinecone,\nChromaDB, Cloudflare Workers, FFmpeg, MongoDB, PostgreSQL,vercel ai sdk,AWS\nDevOpsCI/CD  Pipelines  (Jenkins,  GitHub  Actions),  Docker,  Kubernetes,  Cloudflare  Workers,\nMonitoring\nPROJECTS\nPlumAi, an AI-powered search agent that redefines how we explore information online.  Designed as a highly agentic\nRetrieval-Augmented Generation (RAG) system, PlumAi combines the Tavily LLM Search API and OpenAI API to\ndeliver precise, context-aware search results tailored to your needs.  Built with NextJS, this tool seamlessly blends\nintelligent retrieval with powerful generative capabilities,  making it perfect for digging deep into topics or quickly\nfinding answers.  Whether you’re researching or troubleshooting.  (Try it here)\nFormify, an innovative AI-powered form builder that simplifies data collection and analysis.  Built using NextJS, it\nharnesses the Gemini API to generate dynamic forms from text and the OpenAI API to enable chatting with responses\nfor deeper insights.  It also leverages OpenAI’s tool invocation for graphical visualization through interactive charts.\nWith features like exporting responses to Excel and AI-driven insights, Formify lets you export the responses to Excel\neffortlessly, making response analysis and decision-making a breeze.  (Try it here)\nDataSensei, a groundbreaking AI-powered platform that lets users chat with their entire database using everyday\nlanguage.  Built using NextJS, this agentic tool is designed for seamless end-to-end data querying, insights generation,\nand dynamic visualization.  Powered by the OpenAI API, it leverages large language models (LLMs) and AI-driven\nretrieval to deliver instant answers, spot trends, and create stunning graphical insights with Recharts for visualizations.\nPlus, with Instructor JS reducing hallucinations, you can trust the results to be sharp and reliable.  (Try it here)\nAvocadoAi,  a cutting-edge AI-powered video generator that transforms text into engaging videos.  It seamlessly\nintegrates Grok for script creation, AssemblyAI for high-quality text-to-speech, and OpenAI for accurate captioning.\nThe project also combines stunning AI-generated images—crafted using the Flux model—with premium Getty images\nsourced via the Pexels API. (Try it here)\nStickyNote AI, an innovative AI-powered note-taking app that lets you create small sticky notes and even chat\nwith them!  Built using NextJS and the OpenAI API, this project brings a fun and interactive twist to organizing\nyour thoughts.  (Try it here)\nRivieraInfo, a game-changing event search website tailored for our university community.  Built using NextJS, this\nplatform empowers students to effortlessly filter events based on their preferences, making event discovery faster and\nmore enjoyable.  We scraped the entire college website to gather comprehensive event details, creating a one-stop hub\nfor campus happenings.  The site gained over 700 users in just two days and earned a spot alongside the official site\nas a go-to resource.  (Try it here)\nDBChat,  a  powerful  AI-driven  tool  designed  to  simplify  database  management  by  generating  SQL  queries  for\nPostgreSQL. Built using NextJS, this app harnesses the OpenAI API to create accurate and efficient SQL queries\nfrom natural language input, making it easier for users to interact with their databases without deep SQL expertise.\nWhether you’re querying data, exploring trends, or managing records, DBChat streamlines the process with a sleek,\nmodern interface.  (Try it here)",
+      "chunks": [
+        "KARTHIK NADAR\n+91 9372901773   —   Mumbai, India⋄karthiknadar1204@gmail.com   —   LinkedIn   —   GitHub\nEDUCATION\nBachelor of Computer Science and Engineering\nVellore Institute of Technology2021 - 2025\nFinal Year\nSKILLS\nTechnical SkillsNext.js, React.js, Express.js, Drizzle ORM, Prisma ORM, Firebase, Tailwind CSS, Docker,\nKubernetes,  Jenkins,  GitHub  Actions,  Python,  FastAPI,  Redis,  LangChain,  Pinecone,\nChromaDB, Cloudflare Workers, FFmpeg, MongoDB, PostgreSQL,vercel ai sdk,AWS\nDevOpsCI/CD  Pipelines  (Jenkins,  GitHub  Actions),  Docker,  Kubernetes,  Cloudflare  Workers,\nMonitoring\nPROJECTS\nPlumAi, an AI-powered search agent that redefines how we explore information online.  Designed as a highly agentic\nRetrieval-Augmented Generation (RAG) system, PlumAi combines the Tavily LLM Search API and OpenAI API to\ndeliver precise, context-aware search results tailored to your needs.  Built with NextJS, this tool seamlessly blends",
+        "deliver precise, context-aware search results tailored to your needs.  Built with NextJS, this tool seamlessly blends\nintelligent retrieval with powerful generative capabilities,  making it perfect for digging deep into topics or quickly\nfinding answers.  Whether you’re researching or troubleshooting.  (Try it here)\nFormify, an innovative AI-powered form builder that simplifies data collection and analysis.  Built using NextJS, it\nharnesses the Gemini API to generate dynamic forms from text and the OpenAI API to enable chatting with responses\nfor deeper insights.  It also leverages OpenAI’s tool invocation for graphical visualization through interactive charts.\nWith features like exporting responses to Excel and AI-driven insights, Formify lets you export the responses to Excel\neffortlessly, making response analysis and decision-making a breeze.  (Try it here)\nDataSensei, a groundbreaking AI-powered platform that lets users chat with their entire database using everyday",
+        "effortlessly, making response analysis and decision-making a breeze.  (Try it here)\nDataSensei, a groundbreaking AI-powered platform that lets users chat with their entire database using everyday\nlanguage.  Built using NextJS, this agentic tool is designed for seamless end-to-end data querying, insights generation,\nand dynamic visualization.  Powered by the OpenAI API, it leverages large language models (LLMs) and AI-driven\nretrieval to deliver instant answers, spot trends, and create stunning graphical insights with Recharts for visualizations.\nPlus, with Instructor JS reducing hallucinations, you can trust the results to be sharp and reliable.  (Try it here)\nAvocadoAi,  a cutting-edge AI-powered video generator that transforms text into engaging videos.  It seamlessly\nintegrates Grok for script creation, AssemblyAI for high-quality text-to-speech, and OpenAI for accurate captioning.",
+        "integrates Grok for script creation, AssemblyAI for high-quality text-to-speech, and OpenAI for accurate captioning.\nThe project also combines stunning AI-generated images—crafted using the Flux model—with premium Getty images\nsourced via the Pexels API. (Try it here)\nStickyNote AI, an innovative AI-powered note-taking app that lets you create small sticky notes and even chat\nwith them!  Built using NextJS and the OpenAI API, this project brings a fun and interactive twist to organizing\nyour thoughts.  (Try it here)\nRivieraInfo, a game-changing event search website tailored for our university community.  Built using NextJS, this\nplatform empowers students to effortlessly filter events based on their preferences, making event discovery faster and\nmore enjoyable.  We scraped the entire college website to gather comprehensive event details, creating a one-stop hub\nfor campus happenings.  The site gained over 700 users in just two days and earned a spot alongside the official site",
+        "for campus happenings.  The site gained over 700 users in just two days and earned a spot alongside the official site\nas a go-to resource.  (Try it here)\nDBChat,  a  powerful  AI-driven  tool  designed  to  simplify  database  management  by  generating  SQL  queries  for\nPostgreSQL. Built using NextJS, this app harnesses the OpenAI API to create accurate and efficient SQL queries\nfrom natural language input, making it easier for users to interact with their databases without deep SQL expertise.\nWhether you’re querying data, exploring trends, or managing records, DBChat streamlines the process with a sleek,\nmodern interface.  (Try it here)"
+      ],
+      "metadata": {
+        "source": "/Users/karthiknadar/Desktop/pdfst/temp/4.pdf",
+        "pdf": {
+          "version": "1.10.100",
+          "info": {
+            "PDFFormatVersion": "1.5",
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "Title": "",
+            "Author": "",
+            "Subject": "",
+            "Keywords": "",
+            "Creator": "LaTeX with hyperref",
+            "Producer": "pdfTeX-1.40.26",
+            "CreationDate": "D:20250324102553Z",
+            "ModDate": "D:20250324102553Z",
+            "Trapped": {
+              "name": "False"
+            }
+          },
+          "metadata": null,
+          "totalPages": 2
+        },
+        "loc": {
+          "pageNumber": 1
+        }
+      },
+      "image": null
+    },
+    {
+      "pageNumber": 2,
+      "content": "BotArmy, a smart contest-tracking platform designed to keep competitive programmers in the loop with upcoming\nevents on LeetCode and Codeforces.  Built with NextJS for a smooth frontend and Python FastAPI for a powerful\nbackend, this site runs a cron job—crafted using Node Scheduler—to fetch contest data every Sunday and update\nthe database seamlessly.  It scrapes LeetCode contests using Beautiful Soup and taps into the Codeforces API for\nefficient data retrieval.  Currently, I’m working on expanding the scraper to include CodeChef contests, making it a\none-stop hub for coding challenges.  (GitHub Repository)\nACHIEVEMENTS\n•Competed  in  the  Bajaj  Finserv  Health  flagship  hackathon,  securing  a  spot  in  the  top  8  out  of  22  talented\nparticipants handpicked from across the country to showcase our skills in Pune.  As part of a dynamic team of\nfour, we developed an innovative text-to-video solution designed to transform brochures into engaging video ads\nfor platforms like YouTube and beyond.  I spearheaded the video generation pipeline, optimizing performance\nby  implementing  threads  for  parallel  processing,  significantly  slashing  the  time  needed  to  create  each  video.\nBuilt  using  NextJS  for  frontend,  paired  with  a  Python  FastAPI  backend,  SQLAlchemy  ORM,  and  a  Neon\nPostgreSQL database and clerk authentication.  (GitHub Repository)\n•Reached the final 10 in the Mozilla Firefox Club hackathon organized by VIT Vellore.  Created Opal, a finance\ntracker that analyzes income and expenses based on frequency and type,  enabling users to manage budgets,\ntrack spending, and visualize data with dynamic charts and graphs:  Live Site and GitHub Repository.\nFREELANCING EXPERIENCE\n•Developed a comprehensive inventory management system for a full-fledged factory, streamlining product track-\ning, stock management, and order fulfillment.  Built using Nextjs for both frontend and backend.  (ongoing):\nLive Site.\n•Built a full-fledged project for a Chartered Accountant, incorporating client management, document handling,\nand secure communication features,built using nextjs for both frontend and backend:  Live Site.\n•Created a furniture showcase website that displays products effectively, enhancing user experience and product\ndiscoverability:  Live Site.\nPUBLICATIONS\n•Published a research paper on detecting sign language using Convolutional Neural Networks (CNNs) under the\nguidance of a professor from Nottingham University.  The paper explores the effectiveness of CNN models in\nrecognizing and interpreting sign language gestures, contributing to advancements in accessible communication\ntechnologies.  (Read the paper here)",
+      "chunks": [
+        "BotArmy, a smart contest-tracking platform designed to keep competitive programmers in the loop with upcoming\nevents on LeetCode and Codeforces.  Built with NextJS for a smooth frontend and Python FastAPI for a powerful\nbackend, this site runs a cron job—crafted using Node Scheduler—to fetch contest data every Sunday and update\nthe database seamlessly.  It scrapes LeetCode contests using Beautiful Soup and taps into the Codeforces API for\nefficient data retrieval.  Currently, I’m working on expanding the scraper to include CodeChef contests, making it a\none-stop hub for coding challenges.  (GitHub Repository)\nACHIEVEMENTS\n•Competed  in  the  Bajaj  Finserv  Health  flagship  hackathon,  securing  a  spot  in  the  top  8  out  of  22  talented\nparticipants handpicked from across the country to showcase our skills in Pune.  As part of a dynamic team of\nfour, we developed an innovative text-to-video solution designed to transform brochures into engaging video ads",
+        "four, we developed an innovative text-to-video solution designed to transform brochures into engaging video ads\nfor platforms like YouTube and beyond.  I spearheaded the video generation pipeline, optimizing performance\nby  implementing  threads  for  parallel  processing,  significantly  slashing  the  time  needed  to  create  each  video.\nBuilt  using  NextJS  for  frontend,  paired  with  a  Python  FastAPI  backend,  SQLAlchemy  ORM,  and  a  Neon\nPostgreSQL database and clerk authentication.  (GitHub Repository)\n•Reached the final 10 in the Mozilla Firefox Club hackathon organized by VIT Vellore.  Created Opal, a finance\ntracker that analyzes income and expenses based on frequency and type,  enabling users to manage budgets,\ntrack spending, and visualize data with dynamic charts and graphs:  Live Site and GitHub Repository.\nFREELANCING EXPERIENCE\n•Developed a comprehensive inventory management system for a full-fledged factory, streamlining product track-",
+        "FREELANCING EXPERIENCE\n•Developed a comprehensive inventory management system for a full-fledged factory, streamlining product track-\ning, stock management, and order fulfillment.  Built using Nextjs for both frontend and backend.  (ongoing):\nLive Site.\n•Built a full-fledged project for a Chartered Accountant, incorporating client management, document handling,\nand secure communication features,built using nextjs for both frontend and backend:  Live Site.\n•Created a furniture showcase website that displays products effectively, enhancing user experience and product\ndiscoverability:  Live Site.\nPUBLICATIONS\n•Published a research paper on detecting sign language using Convolutional Neural Networks (CNNs) under the\nguidance of a professor from Nottingham University.  The paper explores the effectiveness of CNN models in\nrecognizing and interpreting sign language gestures, contributing to advancements in accessible communication\ntechnologies.  (Read the paper here)"
+      ],
+      "metadata": {
+        "source": "/Users/karthiknadar/Desktop/pdfst/temp/4.pdf",
+        "pdf": {
+          "version": "1.10.100",
+          "info": {
+            "PDFFormatVersion": "1.5",
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "Title": "",
+            "Author": "",
+            "Subject": "",
+            "Keywords": "",
+            "Creator": "LaTeX with hyperref",
+            "Producer": "pdfTeX-1.40.26",
+            "CreationDate": "D:20250324102553Z",
+            "ModDate": "D:20250324102553Z",
+            "Trapped": {
+              "name": "False"
+            }
+          },
+          "metadata": null,
+          "totalPages": 2
+        },
+        "loc": {
+          "pageNumber": 2
+        }
+      },
+      "image": null
+    }
+  ]
+}
