@@ -1,7 +1,7 @@
 'use server'
 
 import { db } from '@/configs/db';
-import { documents, users, pdfPages } from '@/configs/schema';
+import { documents, users, pdfPages, documentFolders } from '@/configs/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
@@ -20,6 +20,7 @@ type DocumentData = {
   fileUrl: string;
   fileKey: string;
   fileSize: number;
+  folderId: number;
 };
 
 // Function to generate embeddings
@@ -177,6 +178,13 @@ export async function saveDocument(documentData: DocumentData) {
         fileSize: documentData.fileSize,
       })
       .returning();
+    
+    // Associate document with folder
+    await db.insert(documentFolders)
+      .values({
+        documentId: document.id,
+        folderId: documentData.folderId,
+      });
     
     const documentId = document.id;
     console.log(`Document saved with ID: ${documentId}`);

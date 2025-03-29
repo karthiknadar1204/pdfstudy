@@ -6,23 +6,22 @@ import { storage } from "@/configs/firebase";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Upload, File, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { UploadDropzone } from "@/components/ui/upload-dropzone";
 
-interface FirebasePdfUploaderProps {
-  onUploadComplete: (result: {
-    url: string;
-    name: string;
-    size: number;
-    key: string;
-  }) => void;
-  onUploadError: (error: Error) => void;
+interface UploaderProps {
   onUploadBegin: () => void;
+  onUploadComplete: (result: any) => void;
+  onUploadError: (error: any) => void;
+  disabled?: boolean;
 }
 
 export function FirebasePdfUploader({
+  onUploadBegin,
   onUploadComplete,
   onUploadError,
-  onUploadBegin,
-}: FirebasePdfUploaderProps) {
+  disabled = false
+}: UploaderProps) {
   const [file, setFile] = useState<File | null>(null);
   const [progress, setProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
@@ -65,7 +64,7 @@ export function FirebasePdfUploader({
     }
   };
 
-  const handleUpload = async () => {
+  const startUpload = async () => {
     if (!file) return;
     
     try {
@@ -188,7 +187,7 @@ export function FirebasePdfUploader({
             <Button
               className="w-full mt-2"
               size="sm"
-              onClick={handleUpload}
+              onClick={startUpload}
             >
               Upload PDF
             </Button>

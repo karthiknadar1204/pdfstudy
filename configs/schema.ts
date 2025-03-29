@@ -1,5 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, uuid, json, boolean, integer, jsonb } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, serial, text, timestamp, varchar, json, boolean, integer } from 'drizzle-orm/pg-core';
 
 // Users table
 export const users = pgTable('users', {
@@ -29,25 +28,6 @@ export const documents = pgTable('documents', {
   hasChat: boolean('has_chat').default(false).notNull()
 });
 
-// Chat sessions table
-export const chatSessions = pgTable('chat_sessions', {
-  id: serial('id').primaryKey(),
-  userId: serial('user_id').references(() => users.id),
-  documentId: serial('document_id').references(() => documents.id),
-  title: varchar('title', { length: 255 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
-
-// Chat messages table
-export const chatMessages = pgTable('chat_messages', {
-  id: serial('id').primaryKey(),
-  sessionId: serial('session_id').references(() => chatSessions.id),
-  isUserMessage: boolean('is_user_message').notNull(),
-  content: text('content').notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
 // PDF summaries table
 export const summaries = pgTable('summaries', {
   id: serial('id').primaryKey(),
@@ -57,7 +37,7 @@ export const summaries = pgTable('summaries', {
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
-// Add a new table for document chats
+// Document chats table (this is the one we actually use)
 export const documentChats = pgTable('document_chats', {
   id: serial('id').primaryKey(),
   documentId: integer('document_id').notNull().references(() => documents.id, { onDelete: 'cascade' }),
@@ -83,5 +63,23 @@ export const documentChats = pgTable('document_chats', {
   }>(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull()
+});
+
+// Folders table
+export const folders = pgTable('folders', {
+  id: serial('id').primaryKey(),
+  uuid: varchar('uuid', { length: 36 }).notNull().unique(),
+  userId: serial('user_id').references(() => users.id),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// Document folders table
+export const documentFolders = pgTable('document_folders', {
+  id: serial('id').primaryKey(),
+  documentId: serial('document_id').references(() => documents.id),
+  folderId: serial('folder_id').references(() => folders.id),
+  createdAt: timestamp('created_at').defaultNow(),
 });
 
