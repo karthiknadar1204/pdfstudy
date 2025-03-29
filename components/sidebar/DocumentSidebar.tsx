@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronLeft, Plus, ChevronDown, ChevronUp, FileText, Check, Upload } from "lucide-react";
+import { ChevronRight, ChevronLeft, Plus, ChevronDown, ChevronUp, FileText, Check, Upload, Trash2 } from "lucide-react";
 import { useFolderStore } from "@/store/useFolderStore";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import { FirebasePdfUploader } from "@/components/firebase-pdf-uploader";
 import { useToast } from "@/hooks/use-toast";
 import { saveDocument } from "@/actions/document";
 import { useUser } from "@clerk/nextjs";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface UploadDialogProps {
   folderId: number;
@@ -120,13 +121,61 @@ interface FolderItemProps {
 
 const FolderItem = ({ folder, isSelected, onSelect, currentDocumentId, onUploadComplete }: FolderItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<number | null>(null);
+  const [folderDeleteConfirmOpen, setFolderDeleteConfirmOpen] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    if (currentDocumentId && folder.documents.some(doc => doc.id === currentDocumentId)) {
-      setIsExpanded(true);
+  const handleDeleteDocument = async (documentId: number) => {
+    try {
+      const response = await fetch(`/api/documents/${documentId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Document deleted successfully",
+        });
+        onUploadComplete(); // Refresh the folder contents
+      } else {
+        throw new Error("Failed to delete document");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive",
+      });
     }
-  }, [currentDocumentId, folder.documents]);
+    setDocumentToDelete(null);
+  };
+
+  const handleDeleteFolder = async () => {
+    try {
+      const response = await fetch(`/api/folders/${folder.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Folder deleted successfully",
+        });
+        onUploadComplete(); // Refresh the folders list
+      } else {
+        throw new Error("Failed to delete folder");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete folder",
+        variant: "destructive",
+      });
+    }
+    setFolderDeleteConfirmOpen(false);
+  };
 
   return (
     <div className={cn(
@@ -162,6 +211,17 @@ const FolderItem = ({ folder, isSelected, onSelect, currentDocumentId, onUploadC
           <Button
             variant="ghost"
             size="sm"
+            className="h-8 w-8 p-0 mr-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              setFolderDeleteConfirmOpen(true);
+            }}
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
@@ -178,17 +238,49 @@ const FolderItem = ({ folder, isSelected, onSelect, currentDocumentId, onUploadC
             <div
               key={doc.id}
               className={cn(
-                "flex items-center p-1 text-sm cursor-pointer hover:bg-accent/50 rounded",
+                "flex items-center justify-between p-1 text-sm hover:bg-accent/50 rounded group",
                 doc.id === currentDocumentId && "bg-primary/10 font-medium"
               )}
-              onClick={() => router.push(`/chat-with-pdf/${doc.id}`)}
             >
-              <FileText className="h-4 w-4 mr-2" />
-              <span className="truncate">{doc.title}</span>
+              <div
+                className="flex items-center flex-1 cursor-pointer"
+                onClick={() => router.push(`/chat-with-pdf/${doc.id}`)}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                <span className="truncate">{doc.title}</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                onClick={() => {
+                  setDocumentToDelete(doc.id);
+                }}
+              >
+                <Trash2 className="h-3 w-3 text-destructive" />
+              </Button>
             </div>
           ))}
         </div>
       )}
+
+      {/* Document Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={documentToDelete !== null}
+        onClose={() => setDocumentToDelete(null)}
+        onConfirm={() => documentToDelete && handleDeleteDocument(documentToDelete)}
+        title="Delete Document"
+        description="Are you sure you want to delete this document? This action cannot be undone."
+      />
+
+      {/* Folder Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={folderDeleteConfirmOpen}
+        onClose={() => setFolderDeleteConfirmOpen(false)}
+        onConfirm={handleDeleteFolder}
+        title="Delete Folder"
+        description="Are you sure you want to delete this folder and all its documents? This action cannot be undone."
+      />
     </div>
   );
 };
