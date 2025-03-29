@@ -14,11 +14,18 @@ interface FolderItemProps {
   };
   isSelected: boolean;
   onSelect: () => void;
+  currentDocumentId?: number;
 }
 
-const FolderItem = ({ folder, isSelected, onSelect }: FolderItemProps) => {
+const FolderItem = ({ folder, isSelected, onSelect, currentDocumentId }: FolderItemProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    if (currentDocumentId && folder.documents.some(doc => doc.id === currentDocumentId)) {
+      setIsExpanded(true);
+    }
+  }, [currentDocumentId, folder.documents]);
 
   return (
     <div className={cn(
@@ -50,7 +57,10 @@ const FolderItem = ({ folder, isSelected, onSelect }: FolderItemProps) => {
           {folder.documents.map((doc) => (
             <div
               key={doc.id}
-              className="flex items-center p-1 text-sm cursor-pointer hover:bg-accent/50 rounded"
+              className={cn(
+                "flex items-center p-1 text-sm cursor-pointer hover:bg-accent/50 rounded",
+                doc.id === currentDocumentId && "bg-primary/10 font-medium"
+              )}
               onClick={() => router.push(`/chat-with-pdf/${doc.id}`)}
             >
               <FileText className="h-4 w-4 mr-2" />
@@ -63,12 +73,15 @@ const FolderItem = ({ folder, isSelected, onSelect }: FolderItemProps) => {
   );
 };
 
-export function DocumentSidebar() {
+interface DocumentSidebarProps {
+  currentDocumentId?: number;
+}
+
+export function DocumentSidebar({ currentDocumentId }: DocumentSidebarProps) {
   const { folders, selectedFolderId, isCollapsed, selectFolder, toggleCollapse, setFolders } = useFolderStore();
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
 
-  // Fetch folders when component mounts
   useEffect(() => {
     const fetchFolders = async () => {
       try {
@@ -102,7 +115,6 @@ export function DocumentSidebar() {
         useFolderStore.getState().addFolder(folder);
         setNewFolderName("");
         setIsCreatingFolder(false);
-        // Automatically select the newly created folder
         selectFolder(folder.id);
       }
     } catch (error) {
@@ -138,6 +150,7 @@ export function DocumentSidebar() {
               folder={folder}
               isSelected={folder.id === selectedFolderId}
               onSelect={() => handleFolderSelect(folder.id)}
+              currentDocumentId={currentDocumentId}
             />
           ))}
 

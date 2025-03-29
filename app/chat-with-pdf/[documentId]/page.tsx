@@ -12,10 +12,11 @@ import axios from "axios";
 import { MessageDisplay } from "@/components/chat/message-display";
 import { PDFViewer } from "@/components/pdf-viewer";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DocumentSidebar } from "@/components/sidebar/DocumentSidebar";
 
 export default function ChatWithPDFDocument() {
   const params = useParams();
-  const documentId = params.documentId as string;
+  const documentId = parseInt(params.documentId as string);
   const [documentDetails, setDocumentDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -234,79 +235,90 @@ export default function ChatWithPDFDocument() {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <h1 className="text-2xl font-bold mb-6">
-        Chat with: {documentDetails?.title || "PDF Document"}
-      </h1>
-      
-      <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-150px)] rounded-lg border">
-        {/* Chat Panel */}
-        <ResizablePanel defaultSize={40} minSize={30}>
-          <div className="flex flex-col h-full">
-            <CardHeader className="px-4 shrink-0">
-              <CardTitle>Chat</CardTitle>
-              <CardDescription>
-                Ask questions about your document
-              </CardDescription>
-            </CardHeader>
-            
-            {/* Chat Messages - Scrollable Area */}
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-4">
-                {chatMessages.length === 0 ? (
-                  <div className="flex h-40 items-center justify-center">
-                    <div className="text-center">
-                      <h3 className="text-lg font-medium">Chat with your document</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Ask questions about "{documentDetails?.title || 'your document'}"
-                      </p>
+    <div className="flex h-screen">
+      <DocumentSidebar currentDocumentId={documentId} />
+      <div className="flex-1">
+        <ResizablePanelGroup direction="horizontal" className="h-screen">
+          {/* Document Title Bar */}
+          <div className="absolute top-0 left-0 right-0 h-14 border-b bg-background z-10 flex items-center px-4">
+            <h1 className="text-xl font-semibold truncate">
+              {documentDetails?.title || "Loading document..."}
+            </h1>
+          </div>
+
+          {/* Adjust the top padding of the main content to account for the title bar */}
+          <div className="pt-14 w-full h-full">
+            <ResizablePanelGroup direction="horizontal" className="h-full">
+              {/* Chat Panel */}
+              <ResizablePanel defaultSize={40} minSize={30}>
+                <div className="flex flex-col h-full">
+                  <CardHeader className="px-4 shrink-0">
+                    <CardTitle>Chat</CardTitle>
+                    <CardDescription>
+                      Ask questions about "{documentDetails?.title || 'your document'}"
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  {/* Chat Messages - Scrollable Area */}
+                  <ScrollArea className="flex-1">
+                    <div className="p-4 space-y-4">
+                      {chatMessages.length === 0 ? (
+                        <div className="flex h-40 items-center justify-center">
+                          <div className="text-center">
+                            <h3 className="text-lg font-medium">Chat with your document</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Ask questions about "{documentDetails?.title || 'your document'}"
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        chatMessages.map((msg, index) => (
+                          <MessageDisplay key={msg.id || index} message={msg} />
+                        ))
+                      )}
                     </div>
+                  </ScrollArea>
+                  
+                  {/* Message Input - Fixed at Bottom */}
+                  <div className="border-t p-4 shrink-0 bg-background">
+                    <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2">
+                      <Input
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder="Ask a question about your document..."
+                        className="flex-1"
+                        disabled={isLoading}
+                      />
+                      <Button type="submit" disabled={isLoading || !message.trim()}>
+                        Send
+                      </Button>
+                    </form>
+                    {isSaving && (
+                      <p className="text-xs text-muted-foreground mt-2">Saving conversation...</p>
+                    )}
                   </div>
-                ) : (
-                  chatMessages.map((msg, index) => (
-                    <MessageDisplay key={msg.id || index} message={msg} />
-                  ))
-                )}
-              </div>
-            </ScrollArea>
-            
-            {/* Message Input - Fixed at Bottom */}
-            <div className="border-t p-4 shrink-0 bg-background">
-              <form onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }} className="flex gap-2">
-                <Input
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ask a question about your document..."
-                  className="flex-1"
-                  disabled={isLoading}
-                />
-                <Button type="submit" disabled={isLoading || !message.trim()}>
-                  Send
-                </Button>
-              </form>
-              {isSaving && (
-                <p className="text-xs text-muted-foreground mt-2">Saving conversation...</p>
-              )}
-            </div>
+                </div>
+              </ResizablePanel>
+              
+              <ResizableHandle />
+              
+              {/* PDF Viewer Panel */}
+              <ResizablePanel defaultSize={60}>
+                <div className="h-full flex flex-col overflow-hidden">
+                  <CardHeader className="px-4 shrink-0">
+                    <CardTitle>Document Viewer</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-0 overflow-hidden">
+                    {documentDetails?.fileUrl && (
+                      <PDFViewer fileUrl={documentDetails.fileUrl} />
+                    )}
+                  </CardContent>
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
-        </ResizablePanel>
-        
-        <ResizableHandle />
-        
-        {/* PDF Viewer Panel */}
-        <ResizablePanel defaultSize={60}>
-          <div className="h-full flex flex-col overflow-hidden">
-            <CardHeader className="px-4 shrink-0">
-              <CardTitle>Document Viewer</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 p-0 overflow-hidden">
-              {documentDetails?.fileUrl && (
-                <PDFViewer fileUrl={documentDetails.fileUrl} />
-              )}
-            </CardContent>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        </ResizablePanelGroup>
+      </div>
     </div>
   );
 }
