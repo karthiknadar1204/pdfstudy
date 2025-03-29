@@ -102,7 +102,48 @@ export async function processDocumentQuery(query: string, documentId: number) {
  */
 export async function generateResponseFromDocument(query: string, documentId: number) {
   try {
-    // Process the query to get relevant document sections
+    // Check if this is a direct page navigation request
+    const pageNavigationMatch = query.match(/(?:go to|take me to|show|navigate to)?\s*page\s*(\d+)/i);
+    
+    if (pageNavigationMatch) {
+      const requestedPage = parseInt(pageNavigationMatch[1]);
+      
+      // First get the document's base URL by making a search query
+      const { results } = await processDocumentQuery("", documentId);
+      
+      if (results && results.length > 0) {
+        // Extract the base URL from any of the results
+        const baseUrl = results[0].pageUrl?.split('#')[0];
+        
+        if (baseUrl) {
+          const pageUrl = `${baseUrl}#page=${requestedPage}`;
+          
+          return {
+            message: `I'll help you navigate to [Page ${requestedPage}](${pageUrl}). Click the page number to view it.`,
+            sources: [{
+              pageNumber: requestedPage,
+              score: 1,
+              preview: `Navigating to page ${requestedPage}`,
+              pageUrl: pageUrl
+            }],
+            referencedPages: [requestedPage],
+            isPageNavigation: true,
+            targetPage: requestedPage
+          };
+        }
+      }
+      
+      // Fallback if we couldn't get the URL
+      return {
+        message: `I'll help you navigate to page ${requestedPage}.`,
+        sources: [],
+        referencedPages: [requestedPage],
+        isPageNavigation: true,
+        targetPage: requestedPage
+      };
+    }
+    
+    // Regular document query processing continues...
     const { results } = await processDocumentQuery(query, documentId);
     
     if (!results || results.length === 0) {
@@ -113,24 +154,41 @@ export async function generateResponseFromDocument(query: string, documentId: nu
       };
     }
     
-    // Prepare context from the search results
+    // Create a map of page numbers to their URLs
+    const pageUrlMap = results.reduce((map, result) => {
+      if (result.pageUrl) {
+        map[result.pageNumber] = result.pageUrl;
+      }
+      return map;
+    }, {} as Record<number, string>);
+
+    // Prepare context from the search results with page URLs
     const context = results
-      .map(result => `[Page ${result.pageNumber}${result.chunkIndex !== undefined ? `, Chunk ${result.chunkIndex}` : ''}]: ${result.content}`)
+      .map(result => {
+        const pageUrl = result.pageUrl ? `[Page ${result.pageNumber}](${result.pageUrl})` : `Page ${result.pageNumber}`;
+        return `[${pageUrl}${result.chunkIndex !== undefined ? `, Chunk ${result.chunkIndex}` : ''}]: ${result.content}`;
+      })
       .join('\n\n');
     
     // Get unique page numbers for references
     const pageNumbers = [...new Set(results.map(result => result.pageNumber))].sort((a, b) => a - b);
     
-    // Create a system prompt for the AI
+    // Modify the system prompt to instruct the AI to use markdown links for page references
     const systemPrompt = `You are an AI assistant that helps users understand PDF documents. 
 You have access to specific sections of a document that are relevant to the user's query.
 Answer the user's question based ONLY on the provided document sections.
+
+IMPORTANT FORMATTING INSTRUCTIONS:
+1. When referring to page numbers in your response, ALWAYS use the format "[Page X](pageUrl)" using the exact URLs provided below.
+2. Example format: "As discussed in [Page 5](url-to-page-5), the topic..."
+3. Make sure to use the exact page URLs provided - do not modify or create new URLs.
+4. Every page number mention in your response should be a clickable link.
+
 If the information in the document sections is not sufficient to answer the question, 
 acknowledge that and don't make up information.
 
-IMPORTANT: When referring to information, you MUST cite the specific page numbers using the format "According to page X..." or "[Page X]".
-Be sure to mention ALL relevant page numbers that contain information used in your answer.
-Format your response using markdown for better readability.
+Available page URLs:
+${Object.entries(pageUrlMap).map(([page, url]) => `Page ${page}: ${url}`).join('\n')}
 
 Document sections:
 ${context}`;

@@ -13,6 +13,8 @@ interface MessageDisplayProps {
     isUserMessage: boolean;
     isStreaming?: boolean;
     isError?: boolean;
+    isPageNavigation?: boolean;
+    targetPage?: number;
     sources?: Array<{
       pageNumber: number;
       score: number;
@@ -40,10 +42,58 @@ export function MessageDisplay({ message }: MessageDisplayProps) {
   // Function to scroll to a specific page in the PDF viewer
   const scrollToPage = (pageNumber: number) => {
     console.log(`Requesting navigation to page ${pageNumber}`);
-    
-    // Use window.postMessage to communicate with our custom PDF viewer
-    window.postMessage({ type: 'scrollToPage', pageNumber }, '*');
+    // Ensure the page number is a positive integer
+    if (pageNumber > 0) {
+      window.postMessage({ 
+        type: 'scrollToPage', 
+        pageNumber: Math.floor(pageNumber)
+      }, '*');
+    }
   };
+
+  // Custom renderer for links that handles page navigation
+  const customRenderers = {
+    a: ({ href, children }: { href?: string; children: React.ReactNode }) => {
+      // Check if this is a page reference link
+      if (href) {
+        // Handle both formats: direct page numbers and URLs with #page=
+        const pageMatch = href.match(/#page=(\d+)$/);
+        if (pageMatch) {
+          const pageNumber = parseInt(pageMatch[1]);
+          return (
+            <button
+              onClick={() => scrollToPage(pageNumber)}
+              className="text-primary hover:underline font-medium"
+            >
+              {children}
+            </button>
+          );
+        }
+        // For direct page numbers
+        const directPageMatch = href.match(/^(\d+)$/);
+        if (directPageMatch) {
+          const pageNumber = parseInt(directPageMatch[1]);
+          return (
+            <button
+              onClick={() => scrollToPage(pageNumber)}
+              className="text-primary hover:underline font-medium"
+            >
+              {children}
+            </button>
+          );
+        }
+      }
+      // For non-page links, render as normal links
+      return <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>;
+    }
+  };
+
+  // If this is a page navigation message, automatically trigger the navigation
+  React.useEffect(() => {
+    if (message.isPageNavigation && message.targetPage) {
+      scrollToPage(message.targetPage);
+    }
+  }, [message.isPageNavigation, message.targetPage]);
 
   return (
     <div className={`flex ${message.isUserMessage ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -60,7 +110,10 @@ export function MessageDisplay({ message }: MessageDisplayProps) {
         ) : (
           <div>
             <div className="prose dark:prose-invert max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={customRenderers}
+              >
                 {message.content}
               </ReactMarkdown>
             </div>

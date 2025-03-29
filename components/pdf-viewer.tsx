@@ -48,13 +48,15 @@ export function PDFViewer({ fileUrl }: PDFViewerProps) {
     }
   };
   
-  // Set up a message listener to handle page navigation requests
+  // Set up message listener for page navigation requests
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'scrollToPage') {
-        const pageNumber = event.data.pageNumber;
-        console.log(`PDF Viewer received request to navigate to page ${pageNumber}`);
-        goToPage(pageNumber);
+      if (event.data?.type === 'scrollToPage' && event.data?.pageNumber) {
+        console.log(`PDF Viewer received request to navigate to page ${event.data.pageNumber}`);
+        const pageNumber = parseInt(event.data.pageNumber);
+        if (!isNaN(pageNumber) && pageNumber > 0) {
+          goToPage(pageNumber);
+        }
       }
     };
     
